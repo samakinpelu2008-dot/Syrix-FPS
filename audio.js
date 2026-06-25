@@ -1,120 +1,105 @@
 export class AudioEngine {
     constructor() {
         this.ctx = null;
-        this.isUnlocked = false;
     }
 
-    // --- Unlock Browser Audio Thread Constraints ---
     unlock() {
-        if (this.isUnlocked) return;
-        
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
-            this.ctx = new AudioContextClass();
-            this.isUnlocked = true;
-            
-            if (this.ctx.state === 'suspended') {
-                this.ctx.resume();
-            }
+        if (!this.ctx) {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         }
-    }
-
-    // --- Procedural Audio Synthesizer Engine ---
-    play(soundType) {
-        if (!this.isUnlocked || !this.ctx) return;
-        
         if (this.ctx.state === 'suspended') {
             this.ctx.resume();
         }
+    }
+
+    play(type) {
+        if (!this.ctx) return;
+        this.unlock();
 
         const now = this.ctx.currentTime;
 
-        switch (soundType) {
-            case 'shoot': // Automated Rifle Fire Synthesis
-                this.synthesizeRifleShot(now);
-                break;
-                
-            case 'laser': // Heavy Sniper Bolt
-                this.synthesizeSniperLaser(now);
-                break;
-                
-            case 'reload': // Mechanical Magazine Click
-                this.synthesizeMechanicalReload(now);
-                break;
-                
-            case 'damage': // Low-Frequency Impact Thud
-                this.synthesizeImpactThud(now);
-                break;
+        if (type === 'shoot') {
+            // Realistic High-Frequency Gunshot Explosion
+            const bufferSize = this.ctx.sampleRate * 0.12;
+            const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+
+            const noise = this.ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1000, now);
+            filter.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+
+            const gain = this.ctx.createGain();
+            gain.gain.setValueAtTime(0.8, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+            noise.start(now);
+
+        } else if (type === 'laser') {
+            // Heavy Shotgun Blast Impact Frequencies
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, now);
+            osc.frequency.linearRampToValueAtTime(45, now + 0.22);
+
+            gain.gain.setValueAtTime(1.0, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+
+        } else if (type === 'reload') {
+            // Mechanical Metallic Weapon Cocking Sounds
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.setValueAtTime(300, now + 0.15);
+            osc.frequency.setValueAtTime(750, now + 0.35);
+
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.setValueAtTime(0, now + 0.1);
+            gain.gain.setValueAtTime(0.25, now + 0.15);
+            gain.gain.setValueAtTime(0, now + 0.25);
+            gain.gain.setValueAtTime(0.3, now + 0.35);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+
+        } else if (type === 'damage') {
+            // Solid Meat-Impact Punch frequencies
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(95, now);
+            osc.frequency.linearRampToValueAtTime(30, now + 0.08);
+
+            gain.gain.setValueAtTime(0.6, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.08);
         }
     }
-
-    synthesizeRifleShot(time) {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(360, time);
-        osc.frequency.exponentialRampToValueAtTime(20, time + 0.1);
-        
-        gain.gain.setValueAtTime(0.2, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-        
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        
-        osc.start(time);
-        osc.stop(time + 0.11);
-    }
-
-    synthesizeSniperLaser(time) {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(750, time);
-        osc.frequency.exponentialRampToValueAtTime(40, time + 0.3);
-        
-        gain.gain.setValueAtTime(0.3, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
-        
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        
-        osc.start(time);
-        osc.stop(time + 0.31);
-    }
-
-    synthesizeMechanicalReload(time) {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(200, time);
-        
-        gain.gain.setValueAtTime(0.1, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.08);
-        
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        
-        osc.start(time);
-        osc.stop(time + 0.09);
-    }
-
-    synthesizeImpactThud(time) {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(90, time);
-        
-        gain.gain.setValueAtTime(0.4, time);
-        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
-        
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        
-        osc.start(time);
-        osc.stop(time + 0.16);
-    }
-}
+                }
