@@ -1,8 +1,9 @@
-const CACHE_NAME = 'syrix-arena-v1';
+const CACHE_NAME = 'syrix-arena-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './icon-512.png',
   './audio.js',
   './map.js',
   './enemies.js',
@@ -18,7 +19,17 @@ self.addEventListener('install', (e) => {
 });
 
 self.addEventListener('activate', (e) => {
-  e.waitUntil(self.clients.claim());
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', (e) => {
