@@ -4,7 +4,7 @@ export function buildMapArena(scene) {
     // 1. Core Arena Ground Floor Plane
     const floorGeo = new THREE.PlaneGeometry(200, 200, 10, 10);
     const floorMat = new THREE.MeshStandardMaterial({ 
-        color: 0x090a0f, 
+        color: 0xFFFFFF, 
         roughness: 0.65, 
         metalness: 0.2
     });
