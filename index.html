@@ -7,7 +7,7 @@ content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
 <title>Syrix Arena</title>
 
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="./manifest.json">
 
 <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -21,27 +21,40 @@ content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 }
 
 body{
-    overflow:hidden;
     width:100vw;
-    height:100vh;
+    height:100dvh;
+    overflow:hidden;
     color:white;
+    background:#000;
+}
+
+.lobby{
+    position:relative;
+    width:100%;
+    height:100dvh;
+    overflow:hidden;
+
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
 }
 
 .bg{
-    position:fixed;
+    position:absolute;
     inset:0;
+
     width:100%;
     height:100%;
+
     object-fit:cover;
     object-position:center;
+
     z-index:-1;
 }
 
 .glass{
-    background:rgba(15,20,35,.45);
-    backdrop-filter:blur(15px);
+    background:rgba(15,20,35,.55);
+    backdrop-filter:blur(20px);
     border:1px solid rgba(255,255,255,.1);
-    box-shadow:0 0 20px rgba(0,255,255,.2);
 }
 
 /* PLAYER */
@@ -51,11 +64,11 @@ body{
     top:15px;
     left:15px;
 
-    width:230px;
+    width:220px;
 
     padding:12px;
 
-    border-radius:18px;
+    border-radius:20px;
 
     display:flex;
     gap:12px;
@@ -65,13 +78,21 @@ body{
     width:45px;
     height:45px;
 
+    border-radius:12px;
+
+    background:rgba(255,255,255,.1);
+
     display:flex;
     align-items:center;
     justify-content:center;
+}
 
-    border-radius:10px;
+.player h3{
+    font-size:20px;
+}
 
-    background:rgba(255,255,255,.1);
+.player small{
+    opacity:.8;
 }
 
 .xp{
@@ -86,7 +107,7 @@ body{
 }
 
 .fill{
-    width:70%;
+    width:75%;
     height:100%;
 
     border-radius:20px;
@@ -98,12 +119,13 @@ body{
 
 .currency{
     position:absolute;
+
     top:15px;
     right:15px;
 
     padding:10px 15px;
 
-    border-radius:18px;
+    border-radius:20px;
 
     display:flex;
 
@@ -124,44 +146,50 @@ body{
 
 .left-menu{
     position:absolute;
+
     left:15px;
-    top:180px;
+
+    top:38%;
 
     display:flex;
+
     flex-direction:column;
+
     gap:10px;
 }
 
 .left-menu button{
-    width:120px;
-    height:40px;
+    width:110px;
+    height:42px;
 
     border:none;
 
     color:white;
 
-    border-radius:15px;
+    border-radius:14px;
 
-    background:rgba(15,20,35,.55);
-
-    backdrop-filter:blur(15px);
+    background:rgba(20,30,45,.65);
 }
 
-/* RIGHT MENU */
+/* RIGHT */
 
 .right-menu{
     position:absolute;
+
     right:15px;
-    top:180px;
+
+    top:38%;
 
     display:flex;
+
     flex-direction:column;
+
     gap:10px;
 }
 
 .right-menu button{
-    width:50px;
-    height:50px;
+    width:45px;
+    height:45px;
 
     border:none;
 
@@ -169,7 +197,7 @@ body{
 
     color:white;
 
-    background:rgba(15,20,35,.55);
+    background:rgba(20,30,45,.65);
 }
 
 /* CHARACTER */
@@ -178,17 +206,16 @@ body{
     position:absolute;
 
     left:50%;
-    top:48%;
+    top:46%;
 
     transform:translate(-50%,-50%);
 
-    width:220px;
-    height:320px;
+    width:180px;
+    height:260px;
 
     display:flex;
-
-    justify-content:center;
     align-items:center;
+    justify-content:center;
 
     text-align:center;
 
@@ -208,7 +235,7 @@ body{
 
     width:180px;
 
-    padding:10px;
+    padding:12px;
 
     border-radius:18px;
 }
@@ -236,28 +263,27 @@ body{
 
     bottom:25px;
 
-    width:190px;
+    width:180px;
 
-    height:70px;
+    height:65px;
 
     border:none;
 
-    border-radius:20px;
+    border-radius:18px;
 
-    font-size:28px;
+    font-size:26px;
 
     font-weight:bold;
 
-    background:linear-gradient(
-        90deg,
-        #ffbf00,
-        #ffeb3b
-    );
-
     color:black;
 
-    box-shadow:
-        0 0 30px orange;
+    background:linear-gradient(
+        90deg,
+        #ffb800,
+        #ffe94d
+    );
+
+    box-shadow:0 0 30px orange;
 }
 
 /* BOTTOM */
@@ -265,15 +291,17 @@ body{
 .bottom{
     position:absolute;
 
-    left:15px;
+    left:50%;
+
+    transform:translateX(-50%);
 
     bottom:15px;
 
-    width:250px;
+    width:260px;
 
     height:70px;
 
-    border-radius:25px;
+    border-radius:22px;
 
     display:flex;
 
@@ -284,9 +312,7 @@ body{
 
 .bottom button{
     background:none;
-
     border:none;
-
     color:white;
 
     display:flex;
@@ -303,6 +329,11 @@ body{
     height:30px;
 }
 
+.bottom svg{
+    width:24px;
+    height:24px;
+}
+
 /* MOBILE */
 
 @media(max-width:700px){
@@ -317,16 +348,36 @@ body{
         transform-origin:right top;
     }
 
+    .left-menu{
+        top:42%;
+    }
+
+    .right-menu{
+        top:42%;
+    }
+
     .character{
-        width:180px;
-        height:260px;
-        font-size:24px;
+        top:45%;
+        width:150px;
+        height:220px;
+        font-size:22px;
     }
 
-    .left-menu button{
-        width:100px;
+    .mode-box{
+        width:150px;
+        bottom:100px;
     }
 
+    .start-btn{
+        width:160px;
+        height:58px;
+        font-size:22px;
+    }
+
+    .bottom{
+        width:230px;
+        height:65px;
+    }
 }
 
 </style>
@@ -334,46 +385,47 @@ body{
 
 <body>
 
+<div class="lobby">
+
 <img src="./images/bg.png" class="bg">
 
 <!-- PLAYER -->
 
 <div class="player glass">
 
-    <div class="avatar">
-        <i data-lucide="user"></i>
-    </div>
+<div class="avatar">
+<i data-lucide="user"></i>
+</div>
 
-    <div>
-        <small>COMMANDER</small>
+<div>
+<small>COMMANDER</small>
+<h3>PlayerOne</h3>
 
-        <h3>PlayerOne</h3>
+<div class="xp">
+<div class="fill"></div>
+</div>
 
-        <div class="xp">
-            <div class="fill"></div>
-        </div>
-    </div>
-
+</div>
 </div>
 
 <!-- CURRENCY -->
 
 <div class="currency glass">
 
-    <div>
-        <img src="./images/coin.png">
-        1200
-    </div>
+<div>
+<img src="./images/coin.png">
+1200
+</div>
 
-    <div>
-        <img src="./images/gem.png">
-        45
-    </div>
+<div>
+<img src="./images/gem.png">
+45
+</div>
 
-    <div>
-        <img src="./images/token.png">
-        10
-    </div>
+<div>
+<img src="./images/token.png">
+10
+</div>
 
 </div>
 
@@ -381,11 +433,17 @@ body{
 
 <div class="left-menu">
 
-    <button>STORE</button>
+<button class="glass">
+STORE
+</button>
 
-    <button>MISSIONS</button>
+<button class="glass">
+MISSIONS
+</button>
 
-    <button>EVENTS</button>
+<button class="glass">
+EVENTS
+</button>
 
 </div>
 
@@ -393,24 +451,24 @@ body{
 
 <div class="right-menu">
 
-    <button>
-        <i data-lucide="users"></i>
-    </button>
+<button class="glass">
+<i data-lucide="users"></i>
+</button>
 
-    <button>
-        <i data-lucide="mail"></i>
-    </button>
+<button class="glass">
+<i data-lucide="mail"></i>
+</button>
 
-    <button>
-        <i data-lucide="trophy"></i>
-    </button>
+<button class="glass">
+<i data-lucide="trophy"></i>
+</button>
 
 </div>
 
 <!-- CHARACTER -->
 
 <div class="character">
-    SYRIX<br>SOLDIER
+SYRIX<br>SOLDIER
 </div>
 
 <!-- MODE -->
@@ -436,27 +494,29 @@ body{
 <!-- START -->
 
 <button class="start-btn">
-    START ▶
+START ▶
 </button>
 
 <!-- BOTTOM -->
 
 <div class="bottom glass">
 
-    <button>
-        <img src="./images/weapons.png">
-        <small>WEAPONS</small>
-    </button>
+<button>
+<img src="./images/weapons.png">
+<small>WEAPONS</small>
+</button>
 
-    <button>
-        <img src="./images/characters.png">
-        <small>CHARACTERS</small>
-    </button>
+<button>
+<img src="./images/characters.png">
+<small>CHARACTERS</small>
+</button>
 
-    <button>
-        <i data-lucide="settings"></i>
-        <small>SETTINGS</small>
-    </button>
+<button>
+<i data-lucide="settings"></i>
+<small>SETTINGS</small>
+</button>
+
+</div>
 
 </div>
 
