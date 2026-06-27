@@ -24,7 +24,7 @@ body{
     overflow:hidden;
     width:100vw;
     height:100vh;
-    background:#000;
+    color:white;
 }
 
 .bg{
@@ -39,7 +39,7 @@ body{
 
 .glass{
     background:rgba(15,20,35,.45);
-    backdrop-filter:blur(18px);
+    backdrop-filter:blur(15px);
     border:1px solid rgba(255,255,255,.1);
     box-shadow:0 0 20px rgba(0,255,255,.2);
 }
@@ -48,214 +48,241 @@ body{
 
 .player{
     position:absolute;
-    top:20px;
-    left:20px;
-    width:280px;
-    border-radius:20px;
-    padding:15px;
+    top:15px;
+    left:15px;
+
+    width:230px;
+
+    padding:12px;
+
+    border-radius:18px;
+
     display:flex;
-    gap:15px;
-    color:white;
+    gap:12px;
 }
 
 .avatar{
-    width:50px;
-    height:50px;
-    border-radius:12px;
-    background:rgba(255,255,255,.1);
+    width:45px;
+    height:45px;
+
     display:flex;
-    justify-content:center;
     align-items:center;
-}
+    justify-content:center;
 
-.player h2{
-    font-size:28px;
-}
+    border-radius:10px;
 
-.player span{
-    color:#ffc84a;
+    background:rgba(255,255,255,.1);
 }
 
 .xp{
-    width:150px;
+    width:120px;
     height:5px;
+
     background:#333;
+
     border-radius:20px;
+
     margin-top:5px;
 }
 
 .fill{
-    width:75%;
+    width:70%;
     height:100%;
-    background:#00e5ff;
+
     border-radius:20px;
+
+    background:#00e5ff;
 }
 
 /* CURRENCY */
 
 .currency{
     position:absolute;
-    top:20px;
-    right:20px;
-    border-radius:20px;
-    padding:15px 20px;
+    top:15px;
+    right:15px;
+
+    padding:10px 15px;
+
+    border-radius:18px;
+
     display:flex;
-    gap:20px;
+
+    gap:15px;
 }
 
-.item{
+.currency div{
     display:flex;
     align-items:center;
-    gap:8px;
-    color:white;
+    gap:5px;
 }
 
-.item img{
-    width:30px;
+.currency img{
+    width:24px;
+}
+
+/* LEFT MENU */
+
+.left-menu{
+    position:absolute;
+    left:15px;
+    top:180px;
+
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.left-menu button{
+    width:120px;
+    height:40px;
+
+    border:none;
+
+    color:white;
+
+    border-radius:15px;
+
+    background:rgba(15,20,35,.55);
+
+    backdrop-filter:blur(15px);
+}
+
+/* RIGHT MENU */
+
+.right-menu{
+    position:absolute;
+    right:15px;
+    top:180px;
+
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.right-menu button{
+    width:50px;
+    height:50px;
+
+    border:none;
+
+    border-radius:50%;
+
+    color:white;
+
+    background:rgba(15,20,35,.55);
 }
 
 /* CHARACTER */
 
 .character{
     position:absolute;
+
     left:50%;
-    top:43%;
+    top:48%;
+
     transform:translate(-50%,-50%);
+
     width:220px;
-    height:300px;
+    height:320px;
 
     display:flex;
+
     justify-content:center;
     align-items:center;
 
-    color:white;
     text-align:center;
-    font-size:30px;
+
+    font-size:28px;
+
     text-shadow:0 0 20px cyan;
 }
 
-/* CIRCLES */
+/* MODE */
 
-.circle{
+.mode-box{
     position:absolute;
 
-    width:120px;
-    height:120px;
+    right:20px;
 
-    border-radius:50%;
+    bottom:115px;
 
-    background:rgba(20,30,40,.35);
+    width:180px;
 
-    border:2px solid rgba(0,255,255,.4);
+    padding:10px;
 
-    backdrop-filter:blur(15px);
+    border-radius:18px;
+}
 
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
+.mode-box select{
+    width:100%;
+
+    background:none;
+
+    border:none;
 
     color:white;
 
-    box-shadow:
-        0 0 20px rgba(0,255,255,.4),
-        inset 0 0 20px rgba(0,255,255,.2);
+    font-size:18px;
+
+    outline:none;
 }
 
-.kd{
-    left:40px;
-    top:240px;
-}
+/* START */
 
-.acc{
-    right:40px;
-    top:240px;
-}
-
-.circle h1{
-    color:#00e5ff;
-}
-
-/* MINI MAP */
-
-.map{
-    position:absolute;
-    left:40px;
-    bottom:180px;
-
-    width:130px;
-    height:90px;
-
-    border-radius:15px;
-}
-
-/* WEAPON PANEL */
-
-.weapon{
-    position:absolute;
-    right:40px;
-    bottom:180px;
-
-    width:140px;
-    height:90px;
-
-    border-radius:15px;
-}
-
-/* MODES */
-
-.modes{
+.start-btn{
     position:absolute;
 
-    left:50%;
-    bottom:110px;
+    right:20px;
 
-    transform:translateX(-50%);
+    bottom:25px;
 
-    display:flex;
-    gap:20px;
-}
+    width:190px;
 
-.mode{
-    width:180px;
-    height:80px;
+    height:70px;
 
     border:none;
 
     border-radius:20px;
 
-    color:#00e5ff;
+    font-size:28px;
 
-    font-size:30px;
+    font-weight:bold;
 
-    cursor:pointer;
-}
+    background:linear-gradient(
+        90deg,
+        #ffbf00,
+        #ffeb3b
+    );
 
-.mode small{
-    display:block;
-    color:white;
-    font-size:14px;
+    color:black;
+
+    box-shadow:
+        0 0 30px orange;
 }
 
 /* BOTTOM */
 
 .bottom{
-    position:fixed;
+    position:absolute;
 
     left:15px;
-    right:15px;
+
     bottom:15px;
 
-    height:80px;
+    width:250px;
+
+    height:70px;
 
     border-radius:25px;
 
     display:flex;
+
+    justify-content:space-around;
+
+    align-items:center;
 }
 
 .bottom button{
-    flex:1;
-
     background:none;
 
     border:none;
@@ -266,19 +293,12 @@ body{
 
     flex-direction:column;
 
-    justify-content:center;
-
     align-items:center;
 
-    gap:5px;
+    gap:4px;
 }
 
 .bottom img{
-    width:34px;
-    height:34px;
-}
-
-.bottom svg{
     width:30px;
     height:30px;
 }
@@ -288,7 +308,6 @@ body{
 @media(max-width:700px){
 
     .player{
-        width:220px;
         transform:scale(.9);
         transform-origin:left top;
     }
@@ -298,15 +317,16 @@ body{
         transform-origin:right top;
     }
 
-    .circle{
-        width:100px;
-        height:100px;
-    }
-
-    .mode{
-        width:150px;
+    .character{
+        width:180px;
+        height:260px;
         font-size:24px;
     }
+
+    .left-menu button{
+        width:100px;
+    }
+
 }
 
 </style>
@@ -327,10 +347,7 @@ body{
     <div>
         <small>COMMANDER</small>
 
-        <h2>
-            PlayerOne
-            <span>// LV 24</span>
-        </h2>
+        <h3>PlayerOne</h3>
 
         <div class="xp">
             <div class="fill"></div>
@@ -343,20 +360,50 @@ body{
 
 <div class="currency glass">
 
-    <div class="item">
+    <div>
         <img src="./images/coin.png">
-        <span>1200</span>
+        1200
     </div>
 
-    <div class="item">
+    <div>
         <img src="./images/gem.png">
-        <span>45</span>
+        45
     </div>
 
-    <div class="item">
+    <div>
         <img src="./images/token.png">
-        <span>10</span>
+        10
     </div>
+
+</div>
+
+<!-- LEFT -->
+
+<div class="left-menu">
+
+    <button>STORE</button>
+
+    <button>MISSIONS</button>
+
+    <button>EVENTS</button>
+
+</div>
+
+<!-- RIGHT -->
+
+<div class="right-menu">
+
+    <button>
+        <i data-lucide="users"></i>
+    </button>
+
+    <button>
+        <i data-lucide="mail"></i>
+    </button>
+
+    <button>
+        <i data-lucide="trophy"></i>
+    </button>
 
 </div>
 
@@ -366,66 +413,49 @@ body{
     SYRIX<br>SOLDIER
 </div>
 
-<!-- KD -->
+<!-- MODE -->
 
-<div class="circle kd">
-    <small>K/D</small>
-    <h1>1.85</h1>
-</div>
+<div class="mode-box glass">
 
-<!-- ACCURACY -->
+<select>
 
-<div class="circle acc">
-    <small>ACCURACY</small>
-    <h1>68%</h1>
-</div>
+<option>1v1</option>
 
-<!-- MAP -->
+<option>Team</option>
 
-<div class="map glass"></div>
+<option>LV Mode</option>
 
-<!-- WEAPON -->
+<option>Team Death Match</option>
 
-<div class="weapon glass"></div>
+<option>CS Ranked</option>
 
-<!-- MODES -->
-
-<div class="modes">
-
-    <button class="mode glass">
-        ▶ 1v1
-        <small>COMPETITIVE</small>
-    </button>
-
-    <button class="mode glass">
-        ▶ LV MODE
-        <small>LEVELS</small>
-    </button>
+</select>
 
 </div>
+
+<!-- START -->
+
+<button class="start-btn">
+    START ▶
+</button>
 
 <!-- BOTTOM -->
 
 <div class="bottom glass">
 
     <button>
-        <i data-lucide="shopping-cart"></i>
-        <span>STORE</span>
-    </button>
-
-    <button>
         <img src="./images/weapons.png">
-        <span>WEAPONS</span>
+        <small>WEAPONS</small>
     </button>
 
     <button>
         <img src="./images/characters.png">
-        <span>CHARACTERS</span>
+        <small>CHARACTERS</small>
     </button>
 
     <button>
         <i data-lucide="settings"></i>
-        <span>SETTINGS</span>
+        <small>SETTINGS</small>
     </button>
 
 </div>
@@ -441,4 +471,4 @@ if("serviceWorker" in navigator){
 </script>
 
 </body>
-    </html>
+</html>
