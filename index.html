@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 
 <title>Syrix Arena</title>
 
@@ -21,170 +21,289 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 }
 
 body{
-    overflow:hidden;
     width:100vw;
     height:100vh;
-    background:#000;
+    overflow:hidden;
+    background:black;
 }
 
-.background{
+.bg{
     position:fixed;
     inset:0;
     width:100%;
     height:100%;
     object-fit:cover;
-    z-index:-1;
+}
+
+.overlay{
+    position:relative;
+    width:100%;
+    height:100%;
 }
 
 .glass{
-    background:rgba(20,25,35,0.45);
+    background:rgba(15,20,35,0.45);
     backdrop-filter:blur(18px);
-    border:1px solid rgba(255,255,255,0.15);
-    box-shadow:0 0 25px rgba(0,255,255,0.2);
+    border:1px solid rgba(255,255,255,0.12);
+    box-shadow:
+        0 0 25px rgba(0,255,255,.25);
 }
 
-.top-bar{
+/* PLAYER */
+
+.player{
     position:absolute;
     top:15px;
     left:15px;
-    right:15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.profile{
-    width:220px;
-    padding:15px;
+    width:280px;
+    height:75px;
     border-radius:20px;
+    display:flex;
+    align-items:center;
+    padding:15px;
+    gap:15px;
     color:white;
 }
 
-.profile h2{
-    font-size:20px;
+.avatar{
+    width:50px;
+    height:50px;
+    border-radius:12px;
+    background:rgba(255,255,255,.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.profile small{
-    color:#aaa;
+.avatar svg{
+    width:30px;
+    height:30px;
 }
 
-.xp-bar{
-    width:100%;
-    height:6px;
+.player h2{
+    font-size:28px;
+}
+
+.player span{
+    color:#ffc94a;
+}
+
+.xp{
+    width:150px;
+    height:5px;
     background:#333;
     border-radius:20px;
-    margin-top:10px;
+    margin-top:5px;
 }
 
-.xp-fill{
+.fill{
     width:75%;
     height:100%;
-    background:#00d9ff;
     border-radius:20px;
+    background:#00e5ff;
 }
+
+/* CURRENCY */
 
 .currency{
-    display:flex;
-    gap:10px;
-    padding:10px 20px;
-    border-radius:20px;
-}
-
-.currency-item{
-    display:flex;
-    align-items:center;
-    gap:5px;
-    color:white;
-}
-
-.currency-item img{
-    width:30px;
-}
-
-.character-area{
     position:absolute;
-    top:90px;
-    bottom:120px;
-    left:0;
-    right:0;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.character-placeholder{
-    width:220px;
-    height:360px;
-    border-radius:30px;
-    border:2px dashed rgba(255,255,255,0.3);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    color:white;
-    font-size:20px;
-}
-
-.left-card,
-.right-card{
-    position:absolute;
-    top:220px;
-    width:120px;
-    height:120px;
+    right:15px;
+    top:15px;
+    padding:15px 20px;
     border-radius:20px;
+    display:flex;
+    gap:20px;
+}
+
+.item{
+    display:flex;
+    align-items:center;
+    gap:8px;
     color:white;
+}
+
+.item img{
+    width:32px;
+}
+
+/* CHARACTER */
+
+.character{
+    position:absolute;
+    left:50%;
+    top:48%;
+    transform:translate(-50%,-50%);
+    width:280px;
+    height:430px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.character canvas{
+    width:100%;
+    height:100%;
+}
+
+.robot-placeholder{
+    color:white;
+    font-size:22px;
+    text-align:center;
+}
+
+.pedestal{
+    position:absolute;
+    bottom:20px;
+    width:250px;
+    height:25px;
+    border-radius:50%;
+    box-shadow:
+        0 0 30px cyan,
+        0 0 60px cyan;
+}
+
+/* STATS */
+
+.circle{
+    position:absolute;
+    width:140px;
+    height:140px;
+    border-radius:50%;
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
+    color:white;
 }
 
-.left-card{
-    left:15px;
+.kd{
+    left:40px;
+    top:220px;
 }
 
-.right-card{
-    right:15px;
+.acc{
+    right:40px;
+    top:220px;
 }
 
-.bottom-buttons{
+.circle h1{
+    color:#00e5ff;
+    font-size:42px;
+}
+
+/* MAP */
+
+.map{
     position:absolute;
-    bottom:110px;
+    left:40px;
+    bottom:190px;
+    width:140px;
+    height:90px;
+    border-radius:15px;
+}
+
+/* WEAPON STATS */
+
+.weapon{
+    position:absolute;
+    right:40px;
+    bottom:190px;
+    width:150px;
+    height:90px;
+    border-radius:15px;
+}
+
+/* MODES */
+
+.modes{
+    position:absolute;
     width:100%;
+    bottom:110px;
     display:flex;
     justify-content:center;
     gap:20px;
 }
 
 .mode{
-    width:160px;
-    height:80px;
+    width:220px;
+    height:85px;
     border:none;
-    border-radius:20px;
-    color:white;
-    font-size:20px;
+    border-radius:22px;
+    color:#00e5ff;
+    font-size:34px;
+    cursor:pointer;
 }
 
-.navbar{
+.mode small{
+    display:block;
+    color:white;
+    font-size:14px;
+}
+
+/* BOTTOM NAV */
+
+.bottom{
     position:absolute;
-    left:10px;
-    right:10px;
-    bottom:10px;
+    left:15px;
+    right:15px;
+    bottom:15px;
     height:80px;
-    border-radius:30px;
+    border-radius:25px;
     display:flex;
-    justify-content:space-around;
-    align-items:center;
 }
 
-.nav-btn{
-    background:none;
+.bottom button{
+    flex:1;
     border:none;
+    background:none;
     color:white;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:5px;
 }
 
-.nav-btn img{
-    width:40px;
-    height:40px;
+.bottom img{
+    width:38px;
+    height:38px;
+}
+
+.bottom svg{
+    width:35px;
+    height:35px;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+    .player{
+        width:220px;
+    }
+
+    .player h2{
+        font-size:20px;
+    }
+
+    .currency{
+        gap:10px;
+    }
+
+    .item img{
+        width:26px;
+    }
+
+    .circle{
+        width:110px;
+        height:110px;
+    }
+
+    .mode{
+        width:160px;
+        font-size:26px;
+    }
+
 }
 
 </style>
@@ -192,36 +311,137 @@ body{
 
 <body>
 
-<img src="./images/bg.png" class="background">
+<img src="./images/bg.png" class="bg">
 
-<div class="top-bar">
+<div class="overlay">
 
-    <div class="profile glass">
-        <small>COMMANDER</small>
-        <h2>PlayerOne</h2>
+    <!-- PLAYER -->
 
-        <div class="xp-bar">
-            <div class="xp-fill"></div>
+    <div class="player glass">
+
+        <div class="avatar">
+            <i data-lucide="user"></i>
         </div>
+
+        <div>
+            <small>COMMANDER</small>
+            <h2>PlayerOne <span>// LV 24</span></h2>
+
+            <div class="xp">
+                <div class="fill"></div>
+            </div>
+        </div>
+
     </div>
+
+    <!-- CURRENCY -->
 
     <div class="currency glass">
 
-        <div class="currency-item">
+        <div class="item">
             <img src="./images/coin.png">
             <span>1200</span>
         </div>
 
-        <div class="currency-item">
+        <div class="item">
             <img src="./images/gem.png">
             <span>45</span>
         </div>
 
-        <div class="currency-item">
+        <div class="item">
             <img src="./images/token.png">
             <span>10</span>
         </div>
 
     </div>
 
+    <!-- CHARACTER -->
+
+    <div class="character">
+
+        <div class="robot-placeholder">
+            3D CHARACTER
+        </div>
+
+        <div class="pedestal"></div>
+
+    </div>
+
+    <!-- KD -->
+
+    <div class="circle kd glass">
+        <small>K/D RATIO</small>
+        <h1>1.85</h1>
+    </div>
+
+    <!-- ACCURACY -->
+
+    <div class="circle acc glass">
+        <small>ACCURACY</small>
+        <h1>68%</h1>
+    </div>
+
+    <!-- MAP -->
+
+    <div class="map glass"></div>
+
+    <!-- WEAPON -->
+
+    <div class="weapon glass"></div>
+
+    <!-- MODES -->
+
+    <div class="modes">
+
+        <button class="mode glass">
+            ▶ 1v1
+            <small>COMPETITIVE</small>
+        </button>
+
+        <button class="mode glass">
+            ▶ LV MODE
+            <small>LEVELS</small>
+        </button>
+
+    </div>
+
+    <!-- BOTTOM NAV -->
+
+    <div class="bottom glass">
+
+        <button>
+            <i data-lucide="shopping-cart"></i>
+            <span>STORE</span>
+        </button>
+
+        <button>
+            <img src="./images/weapons.png">
+            <span>WEAPONS</span>
+        </button>
+
+        <button>
+            <img src="./images/characters.png">
+            <span>CHARACTERS</span>
+        </button>
+
+        <button>
+            <i data-lucide="settings"></i>
+            <span>SETTINGS</span>
+        </button>
+
+    </div>
+
 </div>
+
+<script>
+
+lucide.createIcons();
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+}
+
+</script>
+
+</body>
+</html>
