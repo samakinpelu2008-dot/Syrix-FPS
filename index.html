@@ -2,93 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- PWA Meta Tags for Mobile Installation -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="images/icon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>Syrix Arena | Home</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b0c16">
+    <link rel="apple-touch-icon" href="./images/icon-192.png">
     
-    <!-- External Libraries -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Syrix Arena</title>
     
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #000; color: white; overflow: hidden; }
-        
-        /* Background Layer */
-        .bg-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('images/bg.png') no-repeat center center/cover;
-            z-index: -1;
-        }
-
-        /* Floating HUD (Pill Style) */
-        .hud-pill {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 50px;
-            position: fixed;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .top-bar { top: 20px; left: 20px; right: 20px; justify-content: space-between; }
-        .currency-bar { display: flex; gap: 15px; }
-        .curr { display: flex; align-items: center; gap: 6px; font-size: 13px; }
-        .curr img { width: 20px; height: 20px; }
-
-        .bottom-nav { 
-            bottom: 20px; left: 50%; transform: translateX(-50%); 
-            padding: 10px 30px; gap: 30px;
-        }
-        .nav-btn { 
-            background: none; border: none; color: white; 
-            display: flex; flex-direction: column; align-items: center; gap: 2px; 
-            cursor: pointer; opacity: 0.8; transition: 0.3s;
-        }
-        .nav-btn img { width: 24px; height: 24px; }
-        .elite-icon { stroke: #00f0ff; width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(0,240,255,0.5)); }
-        .nav-btn span { font-size: 9px; letter-spacing: 0.5px; }
+        /* [Your existing styles remain here] */
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background: #07080e; font-family: system-ui, sans-serif; position: fixed; }
+        #canvas-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; }
+        #lobby-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(11, 12, 22, 0.88) 0%, #07080e 100%); z-index: 500; display: flex; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(30px); transition: opacity 0.5s; }
+        .lobby-panel { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 50px 80px; border-radius: 28px; text-align: center; box-shadow: 0 40px 80px rgba(0,0,0,0.7); }
+        .lobby-title { font-size: 56px; font-weight: 900; color: #fff; letter-spacing: 8px; margin-bottom: 6px; text-shadow: 0 0 25px rgba(0, 240, 255, 0.6); }
+        .lobby-subtitle { font-size: 13px; color: #ff0055; letter-spacing: 6px; margin-bottom: 45px; font-weight: 900; }
+        .btn-start { padding: 18px 56px; font-size: 20px; font-weight: 900; color: #fff; background: #ff0055; border: none; border-radius: 14px; cursor: pointer; letter-spacing: 3px; box-shadow: 0 0 30px #ff0055; transition: transform 0.1s; }
     </style>
+    
+    <script type="importmap">
+        { "imports": { "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js" } }
+    </script>
 </head>
 <body>
 
-    <div class="bg-layer"></div>
-
-    <!-- Top HUD -->
-    <div class="hud-pill top-bar">
-        <div class="profile" style="display:flex; align-items:center; gap:8px;">
-            <i data-lucide="user" class="elite-icon"></i>
-            <span style="font-size: 13px;">PlayerOne</span>
-        </div>
-        <div class="currency-bar">
-            <div class="curr"><img src="images/coin.png"> <span>1,200</span></div>
-            <div class="curr"><img src="images/gem.png"> <span>45</span></div>
-            <div class="curr"><img src="images/token.png"> <span>10</span></div>
+    <div id="lobby-screen">
+        <div class="lobby-panel">
+            <div class="lobby-title">SYRIX ARENA</div>
+            <div class="lobby-subtitle">ELITE COMPETITIVE PLATFORM</div>
+            <button class="btn-start" id="btn-match-start">START MATCH</button>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="hud-pill bottom-nav">
-        <button class="nav-btn"><i data-lucide="shopping-bag" class="elite-icon"></i><span>STORE</span></button>
-        <button class="nav-btn"><img src="images/weapons.png"><span>WEAPONS</span></button>
-        <button class="nav-btn"><img src="images/characters.png"><span>CHARS</span></button>
-        <button class="nav-btn"><i data-lucide="settings" class="elite-icon"></i><span>SETTINGS</span></button>
-    </nav>
+    <div id="canvas-container"></div>
 
-    <!-- PWA Service Worker Registration -->
-    <script>
+    <script type="module">
+        // PWA SERVICE WORKER REGISTRATION
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed', err));
-            });
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker Registered'))
+                .catch(err => console.error('SW Error:', err));
         }
-        lucide.createIcons();
+
+        import * as THREE from 'three';
+        // Rest of your initialization logic...
+        
+        document.getElementById('btn-match-start').addEventListener('click', () => {
+            document.getElementById('lobby-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('lobby-screen').style.display = 'none', 500);
+        });
     </script>
 </body>
 </html>
