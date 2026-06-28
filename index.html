@@ -889,4 +889,68 @@ button,select{
         <i data-lucide="chevron-down" class="chev"></i>
         <select class="mode-select" id="modeSelect">
             <option value="CS-RANKED">CS Ranked</option>
-            <option value="1V1">1
+            <option value="1V1">1v1</option>
+            <option value="TEAM">Team</option>
+            <option value="LV MODE">LV Mode</option>
+            <option value="TDM">TDM</option>
+        </select>
+    </div>
+</div>
+
+<!-- start -->
+<button class="start-btn">
+    <i data-lucide="play"></i>
+    START
+</button>
+
+<!-- chat -->
+<div class="chat glass">
+    <i data-lucide="message-circle"></i>
+    <div class="chat-text">
+        <b>WORLD</b>
+        <span>Tap to chat...</span>
+    </div>
+    <i data-lucide="chevron-right" class="chat-arrow"></i>
+</div>
+
+<!-- bottom bar -->
+<div class="bottom-bar glass">
+    <div class="bottom-btn active">
+        <img src="images/weapons.png" alt="" onerror="this.outerHTML='<i data-lucide=&quot;crosshair&quot;></i>'">
+        WEAPONS
+    </div>
+    <div class="bottom-btn">
+        <img src="images/characters.png" alt="" onerror="this.outerHTML='<i data-lucide=&quot;user&quot;></i>'">
+        CHARACTERS
+    </div>
+    <div class="bottom-btn">
+        <i data-lucide="trophy"></i>
+        LEADERBOARD
+    </div>
+</div>
+
+</div>
+
+<script>
+lucide.createIcons();
+
+var modeSelect=document.getElementById('modeSelect');
+var modeLabel=document.getElementById('modeLabel');
+modeSelect.addEventListener('change',function(){
+    modeLabel.textContent=this.value;
+});
+
+var friendsCard=document.getElementById('friendsCard');
+var friendsToggle=document.getElementById('friendsToggle');
+friendsToggle.addEventListener('click',function(){
+    var isOpen=friendsCard.classList.toggle('open');
+    friendsToggle.setAttribute('aria-expanded',isOpen?'true':'false');
+});
+
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+}
+</script>
+
+</body>
+</html>
