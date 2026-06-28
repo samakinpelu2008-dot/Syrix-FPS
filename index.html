@@ -3,17 +3,14 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport"
-content="width=device-width,
-initial-scale=1.0,
-viewport-fit=cover">
+content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>Syrix Arena</title>
 
-<link rel="manifest" href="./manifest.json">
+<link rel="manifest" href="manifest.json">
 
-<meta name="theme-color" content="#020814">
+<meta name="theme-color" content="#000000">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -36,15 +33,13 @@ body{
 }
 
 body{
-    width:100vw;
-    height:100dvh;
-    position:relative;
-    font-family:Arial,sans-serif;
+    position:fixed;
+    inset:0;
 }
 
 /* Background */
 
-.bg{
+#background{
     position:fixed;
     top:0;
     left:0;
@@ -58,20 +53,17 @@ body{
     z-index:-1;
 
     user-select:none;
-    pointer-events:none;
+    -webkit-user-drag:none;
 }
 
-/* Safe area for modern phones */
+/* Safe area */
 
-.safe-area{
+#safe-area{
     position:absolute;
-    inset:0;
-
-    padding:
-    env(safe-area-inset-top)
-    env(safe-area-inset-right)
-    env(safe-area-inset-bottom)
-    env(safe-area-inset-left);
+    top:env(safe-area-inset-top);
+    left:env(safe-area-inset-left);
+    right:env(safe-area-inset-right);
+    bottom:env(safe-area-inset-bottom);
 }
 
 </style>
@@ -81,18 +73,25 @@ body{
 <body>
 
 <img
-src="./images/bg.png"
-class="bg"
+id="background"
+src="images/bg.png"
 alt="Syrix Arena Background">
 
-<div class="safe-area">
-</div>
+<div id="safe-area"></div>
 
 <script>
 
-if('serviceWorker' in navigator){
-    window.addEventListener('load',()=>{
-        navigator.serviceWorker.register('./sw.js');
+/* Register Service Worker */
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+        .then(() => {
+            console.log("SW Registered");
+        })
+        .catch(err => {
+            console.log(err);
+        });
     });
 }
 
