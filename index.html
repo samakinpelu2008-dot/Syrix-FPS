@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width,
-initial-scale=1.0,
-viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
 
 <title>Syrix Arena</title>
 
 <link rel="manifest" href="manifest.json">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -20,277 +21,695 @@ viewport-fit=cover">
     padding:0;
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
+    user-select:none;
+}
+
+:root{
+    --cyan:#22d6ff;
+    --cyan-soft:rgba(34,214,255,.55);
+    --panel:rgba(6,14,24,.58);
+    --panel-strong:rgba(4,10,18,.72);
+    --ink:#eaf7ff;
+    --dim:#8fa9b8;
+    --gold-1:#ffe27a;
+    --gold-2:#ffc534;
+    --gold-3:#e2860a;
 }
 
 html,body{
     width:100%;
     height:100%;
     overflow:hidden;
-    font-family:Arial,sans-serif;
-    background:#000;
+    font-family:'Rajdhani',Arial,sans-serif;
+    background:#02060a;
 }
 
 body{
-    background:url("images/bg.png");
-    background-size:cover;
-    background-position:center;
-    background-repeat:no-repeat;
+    background:url("images/bg.png") center/cover no-repeat,#02060a;
+    position:relative;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:radial-gradient(ellipse at center,rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 100%);
+    pointer-events:none;
 }
 
 .overlay{
     position:fixed;
-    inset:0;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    width:100%;
+    height:100%;
+    font-size:1vw;
 }
 
-/* TOP BAR */
+button,select{
+    font-family:inherit;
+    cursor:pointer;
+}
+
+/* glass panel base */
+.glass{
+    background:var(--panel);
+    border:1px solid var(--cyan-soft);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 0 0 1px rgba(34,214,255,.08) inset,0 8px 18px rgba(0,0,0,.35);
+}
+
+/* ============ PROFILE ============ */
 
 .profile{
     position:absolute;
-    top:20px;
-    left:20px;
-    width:180px;
-    height:65px;
-    background:rgba(0,0,0,.55);
-    border:1px solid #23d7ff;
-    border-radius:20px;
-    backdrop-filter:blur(10px);
+    top:1.8vw;
+    left:1.4vw;
+    width:21vw;
+    max-width:300px;
+    height:7.2vw;
+    max-height:100px;
+    border-radius:1.4vw;
     display:flex;
     align-items:center;
-    padding:10px;
+    gap:.9vw;
+    padding:.8vw 1vw;
+}
+
+.avatar-wrap{
+    position:relative;
+    width:5.4vw;
+    height:5.4vw;
+    max-width:74px;
+    max-height:74px;
+    flex-shrink:0;
+}
+
+.avatar-fallback{
+    position:absolute;
+    inset:0;
+    border-radius:.7vw;
+    background:linear-gradient(155deg,#1b3a4a,#0a1620);
+    border:1px solid rgba(34,214,255,.6);
 }
 
 .avatar{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    background:#222;
-    margin-right:10px;
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:.7vw;
+    object-fit:cover;
+    display:block;
 }
 
-.player-name{
-    color:white;
-    font-size:18px;
-    font-weight:bold;
-}
-
-.top-icons{
+.rank-badge{
     position:absolute;
-    top:25px;
-    left:230px;
-    display:flex;
-    gap:15px;
-}
-
-.icon-btn{
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    background:rgba(0,0,0,.55);
+    top:-.5vw;
+    right:-.5vw;
+    width:1.7vw;
+    height:1.7vw;
+    min-width:22px;
+    min-height:22px;
+    border-radius:50%;
+    background:#0c1924;
+    border:1px solid var(--cyan);
     display:flex;
     align-items:center;
     justify-content:center;
-    border:1px solid #23d7ff;
-    color:white;
+    color:var(--cyan);
 }
+
+.rank-badge i{width:60%;height:60%;}
+
+.profile-info{
+    display:flex;
+    flex-direction:column;
+    gap:.5vw;
+    min-width:0;
+}
+
+.player-name{
+    color:var(--ink);
+    font-weight:700;
+    font-size:1.25vw;
+    letter-spacing:.03em;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.level-row{
+    display:flex;
+    align-items:center;
+    gap:.5vw;
+}
+
+.level-label{
+    color:var(--dim);
+    font-size:.85vw;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.level-bar{
+    flex:1;
+    height:.5vw;
+    min-height:6px;
+    border-radius:1vw;
+    background:rgba(255,255,255,.12);
+    overflow:hidden;
+}
+
+.level-fill{
+    height:100%;
+    width:55%;
+    border-radius:1vw;
+    background:linear-gradient(90deg,#1aa6ff,var(--cyan));
+}
+
+/* ============ TOP ICONS ============ */
+
+.top-icons{
+    position:absolute;
+    top:1.8vw;
+    left:24vw;
+    display:flex;
+    gap:.8vw;
+}
+
+.icon-btn{
+    position:relative;
+    width:3.8vw;
+    height:3.8vw;
+    max-width:54px;
+    max-height:54px;
+    border-radius:.9vw;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--ink);
+    border-radius:.9vw;
+}
+
+.icon-btn i{width:48%;height:48%;}
+
+.icon-btn .dot{
+    position:absolute;
+    top:-.3vw;
+    right:-.3vw;
+    width:.7vw;
+    height:.7vw;
+    min-width:8px;
+    min-height:8px;
+    border-radius:50%;
+    background:#ff3b3b;
+    border:1px solid #02060a;
+}
+
+/* ============ LOGO ============ */
 
 .logo{
     position:absolute;
-    top:20px;
+    top:1.1vw;
     left:50%;
     transform:translateX(-50%);
-    color:#33e7ff;
-    font-size:32px;
-    font-weight:900;
-    text-shadow:0 0 20px cyan;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.2vw;
 }
+
+.logo-icon{
+    width:3vw;
+    height:3vw;
+    color:var(--cyan);
+    filter:drop-shadow(0 0 10px rgba(34,214,255,.85));
+}
+
+.logo-text{
+    font-family:'Orbitron',sans-serif;
+    font-weight:800;
+    font-size:2.4vw;
+    letter-spacing:.04em;
+    line-height:1;
+    white-space:nowrap;
+}
+
+.logo-text .w{color:#f4fbff;text-shadow:0 0 14px rgba(255,255,255,.35);}
+.logo-text .c{color:var(--cyan);text-shadow:0 0 18px rgba(34,214,255,.9);}
+
+/* ============ CURRENCY ============ */
 
 .currency{
     position:absolute;
-    top:20px;
-    right:20px;
+    top:1.8vw;
+    right:1.4vw;
     display:flex;
-    gap:15px;
-    background:rgba(0,0,0,.55);
-    border-radius:20px;
-    padding:12px;
-    border:1px solid #23d7ff;
+    gap:.7vw;
 }
 
 .money{
     display:flex;
     align-items:center;
-    gap:6px;
-    color:white;
-    font-weight:bold;
+    gap:.5vw;
+    height:3.8vw;
+    max-height:54px;
+    padding:0 .5vw 0 .7vw;
+    border-radius:1.4vw;
+    color:var(--ink);
+    font-weight:700;
+    font-size:1.05vw;
 }
 
-.money img{
-    width:28px;
+.money img,.money i{
+    width:1.7vw;
+    height:1.7vw;
+    min-width:22px;
+    min-height:22px;
+    object-fit:contain;
 }
 
-/* LEFT MENU */
+.icon-coin{color:#ffd23f;}
+.icon-gem{color:#3fd1ff;}
+.icon-ticket{color:#c66bff;}
+
+.plus-btn{
+    width:1.9vw;
+    height:1.9vw;
+    min-width:24px;
+    min-height:24px;
+    margin-left:.3vw;
+    border-radius:.5vw;
+    background:rgba(34,214,255,.12);
+    border:1px solid var(--cyan-soft);
+    color:var(--cyan);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.1vw;
+    line-height:1;
+}
+
+/* ============ LEFT MENU ============ */
 
 .left-menu{
     position:absolute;
-    top:180px;
-    left:20px;
+    top:11vw;
+    left:1.4vw;
     display:flex;
     flex-direction:column;
-    gap:15px;
+    gap:1vw;
+    width:18vw;
+    max-width:255px;
 }
 
 .menu-btn{
-    width:160px;
-    height:50px;
-    border-radius:15px;
-    background:rgba(0,0,0,.6);
-    border:1px solid cyan;
-    color:white;
+    height:4.3vw;
+    max-height:62px;
+    border-radius:1vw;
+    border:none;
     display:flex;
     align-items:center;
-    gap:10px;
-    padding-left:20px;
+    gap:.9vw;
+    padding:0 1vw;
+    color:var(--ink);
+    font-weight:700;
+    font-size:1.05vw;
+    letter-spacing:.03em;
 }
 
-/* FRIENDS */
+.menu-icon{
+    width:2.6vw;
+    height:2.6vw;
+    min-width:34px;
+    min-height:34px;
+    border-radius:.7vw;
+    background:rgba(34,214,255,.14);
+    border:1px solid var(--cyan-soft);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--cyan);
+    flex-shrink:0;
+}
+
+.menu-icon i{width:58%;height:58%;}
+
+/* ============ FRIENDS ============ */
 
 .friends{
     position:absolute;
-    right:20px;
-    top:140px;
-    width:180px;
-    height:220px;
-    background:rgba(0,0,0,.6);
-    border-radius:20px;
-    border:1px solid cyan;
-    padding:15px;
-    color:white;
+    top:11vw;
+    right:1.4vw;
+    width:20.5vw;
+    max-width:295px;
+    border-radius:1.4vw;
+    padding:1vw 1.1vw;
 }
+
+.friends-head{
+    display:flex;
+    align-items:center;
+    gap:.6vw;
+    color:var(--ink);
+    font-weight:800;
+    font-size:1.05vw;
+    letter-spacing:.06em;
+    padding-bottom:.7vw;
+    margin-bottom:.6vw;
+    border-bottom:1px solid rgba(34,214,255,.2);
+}
+
+.friends-head i{width:1.2vw;height:1.2vw;color:var(--cyan);}
 
 .friend{
     display:flex;
-    justify-content:space-between;
-    margin-top:15px;
+    align-items:center;
+    gap:.7vw;
+    padding:.5vw 0;
 }
 
-/* MODE */
-
-.mode{
-    position:absolute;
-    right:20px;
-    bottom:140px;
-    width:180px;
-    height:50px;
-    border-radius:15px;
-    background:rgba(0,0,0,.7);
-    border:1px solid cyan;
-    color:white;
-    padding:10px;
+.friend-avatar{
+    width:2.9vw;
+    height:2.9vw;
+    min-width:38px;
+    min-height:38px;
+    border-radius:.7vw;
+    flex-shrink:0;
+    background:linear-gradient(155deg,#2a4a5c,#0c1a22);
+    border:1px solid rgba(34,214,255,.4);
 }
 
-/* START */
+.friend-info{
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:.15vw;
+}
 
-.start{
+.friend-name{
+    color:var(--ink);
+    font-weight:700;
+    font-size:.95vw;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.friend-status{
+    display:flex;
+    align-items:center;
+    gap:.35vw;
+    font-size:.75vw;
+    font-weight:600;
+    letter-spacing:.04em;
+}
+
+.friend-status .pulse{
+    width:.45vw;
+    height:.45vw;
+    min-width:6px;
+    min-height:6px;
+    border-radius:50%;
+}
+
+.status-online{color:#4ee08a;}
+.status-online .pulse{background:#4ee08a;box-shadow:0 0 6px #4ee08a;}
+.status-offline{color:#7b8b96;}
+.status-offline .pulse{background:#7b8b96;}
+
+.friend-add{
+    width:1.9vw;
+    height:1.9vw;
+    min-width:24px;
+    min-height:24px;
+    border-radius:.5vw;
+    background:rgba(34,214,255,.1);
+    border:1px solid var(--cyan-soft);
+    color:var(--cyan);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+}
+
+.friend-add i{width:60%;height:60%;}
+
+/* ============ MODE + START ============ */
+
+.side-bottom{
     position:absolute;
-    right:20px;
-    bottom:70px;
-    width:180px;
-    height:60px;
+    right:1.4vw;
+    bottom:6.2vw;
+    width:20.5vw;
+    max-width:295px;
+    display:flex;
+    flex-direction:column;
+    gap:.9vw;
+}
+
+.mode-card{
+    border-radius:1.1vw;
+    overflow:hidden;
+}
+
+.mode-row{
+    display:flex;
+    align-items:center;
+    gap:.6vw;
+    padding:.85vw 1vw;
+    color:var(--ink);
+}
+
+.mode-row.main{
+    font-weight:700;
+    font-size:1.05vw;
+    letter-spacing:.04em;
+}
+
+.mode-row.main i:first-child{color:var(--cyan);width:1.2vw;height:1.2vw;}
+.mode-row.main .chev{margin-left:auto;width:1.1vw;height:1.1vw;color:var(--dim);}
+
+.mode-divider{height:1px;background:rgba(34,214,255,.2);margin:0 1vw;}
+
+.mode-row.sub{
+    font-size:.85vw;
+    font-weight:600;
+    color:var(--dim);
+    padding-top:.7vw;
+    padding-bottom:.8vw;
+}
+
+.mode-row.sub i{width:1vw;height:1vw;}
+
+.mode-select{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:2.75vw;
+    opacity:0;
     border:none;
-    border-radius:15px;
-    background:#00d9ff;
-    color:black;
-    font-size:26px;
-    font-weight:bold;
+    background:none;
 }
 
-/* BOTTOM */
+.start-btn{
+    height:5.4vw;
+    max-height:78px;
+    border:none;
+    border-radius:1.1vw;
+    background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 55%,var(--gold-3));
+    color:#1a1100;
+    font-family:'Orbitron',sans-serif;
+    font-weight:800;
+    font-size:1.9vw;
+    letter-spacing:.04em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.6vw;
+    box-shadow:0 .5vw 1.4vw rgba(255,197,52,.45),0 0 0 1px rgba(255,255,255,.3) inset;
+}
+
+.start-btn i{width:1.5vw;height:1.5vw;fill:#1a1100;}
+
+/* ============ CHAT ============ */
+
+.chat{
+    position:absolute;
+    left:1.4vw;
+    bottom:1.6vw;
+    width:20.5vw;
+    max-width:295px;
+    height:3.6vw;
+    max-height:52px;
+    border-radius:1.4vw;
+    display:flex;
+    align-items:center;
+    gap:.6vw;
+    padding:0 1vw;
+    color:var(--ink);
+}
+
+.chat>i:first-child{width:1.3vw;height:1.3vw;color:var(--cyan);flex-shrink:0;}
+
+.chat-text{
+    display:flex;
+    flex-direction:column;
+    gap:.05vw;
+    flex:1;
+    min-width:0;
+}
+
+.chat-text b{
+    font-size:.78vw;
+    letter-spacing:.08em;
+    color:var(--cyan);
+}
+
+.chat-text span{
+    font-size:.85vw;
+    color:var(--dim);
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.chat-arrow{width:1vw;height:1vw;color:var(--dim);flex-shrink:0;}
+
+/* ============ BOTTOM BAR ============ */
 
 .bottom-bar{
     position:absolute;
-    bottom:10px;
     left:50%;
+    bottom:0;
     transform:translateX(-50%);
-    width:340px;
-    height:60px;
-    background:rgba(0,0,0,.7);
-    border:1px solid cyan;
-    border-radius:20px;
+    width:54vw;
+    max-width:780px;
+    height:5.6vw;
+    max-height:80px;
+    border-radius:1.4vw 1.4vw 0 0;
     display:flex;
+    border-bottom:none;
 }
 
 .bottom-btn{
     flex:1;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    color:white;
-    gap:10px;
+    gap:.3vw;
+    color:var(--ink);
+    font-weight:700;
+    font-size:.85vw;
+    letter-spacing:.02em;
+    position:relative;
 }
 
-.bottom-btn img{
-    width:30px;
-}
-
-/* CHAT */
-
-.chat{
+.bottom-btn:not(:last-child)::after{
+    content:"";
     position:absolute;
-    left:20px;
-    bottom:20px;
-    width:170px;
-    height:45px;
-    border-radius:15px;
-    background:rgba(0,0,0,.7);
-    border:1px solid cyan;
+    right:0;
+    top:30%;
+    height:40%;
+    width:1px;
+    background:rgba(34,214,255,.18);
+}
+
+.bottom-btn img,.bottom-btn i{
+    width:1.9vw;
+    height:1.9vw;
+    min-width:24px;
+    min-height:24px;
+    object-fit:contain;
+    color:var(--cyan);
+}
+
+.bottom-btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:1.6vw;
+    height:.25vw;
+    background:linear-gradient(90deg,var(--gold-2),var(--gold-1));
+    border-radius:0 0 .3vw .3vw;
+    opacity:.55;
+}
+
+.bottom-btn.active::before{opacity:1;}
+
+/* ============ CORNER NAV ============ */
+
+.corner-nav{
+    position:absolute;
+    bottom:1.4vw;
+    width:2.6vw;
+    height:2.6vw;
+    min-width:34px;
+    min-height:34px;
+    border-radius:50%;
     display:flex;
     align-items:center;
-    padding-left:15px;
-    color:white;
+    justify-content:center;
+    color:var(--cyan);
 }
 
-/* MOBILE */
+.corner-nav i{width:55%;height:55%;}
+.corner-nav.left{left:1.4vw;}
+.corner-nav.right{right:1.4vw;}
 
-@media(max-width:800px){
+/* ============ MOBILE PORTRAIT ============ */
 
-.logo{
-    font-size:22px;
-}
+@media(max-width:800px) and (orientation:portrait){
 
-.profile{
-    width:150px;
-}
+.overlay{font-size:2vw;}
 
-.currency{
-    transform:scale(.85);
-    transform-origin:right top;
-}
+.profile{width:48vw;height:15vw;left:2.5vw;top:2.5vw;}
+.avatar-wrap{width:11vw;height:11vw;}
+.player-name{font-size:2.6vw;}
+.level-label{font-size:1.8vw;}
 
-.left-menu{
-    top:140px;
-}
+.top-icons{left:auto;right:2.5vw;top:18.5vw;}
+.icon-btn{width:8vw;height:8vw;}
 
-.menu-btn{
-    width:120px;
-    height:42px;
-    font-size:13px;
-}
+.logo{top:2.5vw;}
+.logo-icon{width:6vw;height:6vw;}
+.logo-text{font-size:5vw;}
 
-.friends{
-    width:140px;
-}
+.currency{left:2.5vw;right:2.5vw;top:18.5vw;justify-content:flex-start;}
+.money{height:7vw;font-size:2.2vw;}
+.money img,.money i{width:3.5vw;height:3.5vw;}
 
-.mode{
-    width:140px;
-}
+.left-menu{top:27vw;left:2.5vw;width:44vw;gap:2vw;}
+.menu-btn{height:9vw;font-size:2.2vw;}
+.menu-icon{width:5.5vw;height:5.5vw;}
 
-.start{
-    width:140px;
-}
+.friends{display:none;}
 
-.bottom-bar{
-    width:280px;
-}
+.side-bottom{right:2.5vw;left:2.5vw;width:auto;bottom:13vw;}
+.mode-row.main{font-size:2.2vw;}
+.mode-row.sub{font-size:1.8vw;}
+.start-btn{height:11vw;font-size:4vw;}
+
+.chat{left:2.5vw;width:44vw;height:8vw;bottom:1.6vw;}
+.chat-text b{font-size:1.6vw;}
+.chat-text span{font-size:1.8vw;}
+
+.bottom-bar{width:92vw;height:10vw;}
+.bottom-btn{font-size:1.7vw;}
+.bottom-btn img,.bottom-btn i{width:4vw;height:4vw;}
+
+.corner-nav{display:none;}
 
 }
 
@@ -301,131 +720,198 @@ body{
 
 <div class="overlay">
 
-<div class="profile">
-<div class="avatar"></div>
-<div>
-<div style="color:#aaa;font-size:12px;">COMMANDER</div>
-<div class="player-name">PlayerOne</div>
-</div>
+<!-- profile -->
+<div class="profile glass">
+    <div class="avatar-wrap">
+        <div class="avatar-fallback"></div>
+        <img class="avatar" src="images/avatar.png" alt="" onerror="this.style.display='none'">
+        <div class="rank-badge"><i data-lucide="shield"></i></div>
+    </div>
+    <div class="profile-info">
+        <div class="player-name">PLAYER NAME</div>
+        <div class="level-row">
+            <span class="level-label">Lv. 50</span>
+            <div class="level-bar"><div class="level-fill"></div></div>
+        </div>
+    </div>
 </div>
 
+<!-- bell / mail -->
 <div class="top-icons">
-<div class="icon-btn">
-<i data-lucide="bell"></i>
+    <button class="icon-btn glass">
+        <i data-lucide="bell"></i>
+        <span class="dot"></span>
+    </button>
+    <button class="icon-btn glass">
+        <i data-lucide="mail"></i>
+    </button>
 </div>
 
-<div class="icon-btn">
-<i data-lucide="settings"></i>
-</div>
-</div>
-
+<!-- logo -->
 <div class="logo">
-SYRIX ARENA
+    <i data-lucide="shield-half" class="logo-icon"></i>
+    <div class="logo-text"><span class="w">SYRIX</span> <span class="c">ARENA</span></div>
 </div>
 
+<!-- currency -->
 <div class="currency">
-
-<div class="money">
-<img src="images/coin.png">
-1200
+    <div class="money glass">
+        <i data-lucide="coins" class="icon-coin"></i>
+        <span>12500</span>
+        <button class="plus-btn">+</button>
+    </div>
+    <div class="money glass">
+        <i data-lucide="gem" class="icon-gem"></i>
+        <span>850</span>
+        <button class="plus-btn">+</button>
+    </div>
+    <div class="money glass">
+        <i data-lucide="ticket" class="icon-ticket"></i>
+        <span>24</span>
+        <button class="plus-btn">+</button>
+    </div>
 </div>
 
-<div class="money">
-<img src="images/gem.png">
-45
-</div>
-
-<div class="money">
-<img src="images/token.png">
-10
-</div>
-
-</div>
-
+<!-- left menu -->
 <div class="left-menu">
-
-<div class="menu-btn">
-<i data-lucide="shopping-cart"></i>
-STORE
+    <button class="menu-btn glass">
+        <span class="menu-icon"><i data-lucide="shopping-cart"></i></span>
+        STORE
+    </button>
+    <button class="menu-btn glass">
+        <span class="menu-icon"><i data-lucide="sparkles"></i></span>
+        LUCKY ARENA
+    </button>
+    <button class="menu-btn glass">
+        <span class="menu-icon"><i data-lucide="calendar-days"></i></span>
+        EVENTS
+    </button>
 </div>
 
-<div class="menu-btn">
-<i data-lucide="sparkles"></i>
-LUCKY ARENA
+<!-- friends -->
+<div class="friends glass">
+    <div class="friends-head"><i data-lucide="users"></i>FRIENDS</div>
+
+    <div class="friend">
+        <div class="friend-avatar"></div>
+        <div class="friend-info">
+            <div class="friend-name">FRIEND NAME</div>
+            <div class="friend-status status-online"><span class="pulse"></span>ONLINE</div>
+        </div>
+        <button class="friend-add"><i data-lucide="plus"></i></button>
+    </div>
+
+    <div class="friend">
+        <div class="friend-avatar"></div>
+        <div class="friend-info">
+            <div class="friend-name">FRIEND NAME</div>
+            <div class="friend-status status-online"><span class="pulse"></span>ONLINE</div>
+        </div>
+        <button class="friend-add"><i data-lucide="plus"></i></button>
+    </div>
+
+    <div class="friend">
+        <div class="friend-avatar"></div>
+        <div class="friend-info">
+            <div class="friend-name">FRIEND NAME</div>
+            <div class="friend-status status-online"><span class="pulse"></span>ONLINE</div>
+        </div>
+        <button class="friend-add"><i data-lucide="plus"></i></button>
+    </div>
+
+    <div class="friend">
+        <div class="friend-avatar"></div>
+        <div class="friend-info">
+            <div class="friend-name">FRIEND NAME</div>
+            <div class="friend-status status-offline"><span class="pulse"></span>OFFLINE</div>
+        </div>
+        <button class="friend-add"><i data-lucide="plus"></i></button>
+    </div>
+
+    <div class="friend">
+        <div class="friend-avatar"></div>
+        <div class="friend-info">
+            <div class="friend-name">FRIEND NAME</div>
+            <div class="friend-status status-offline"><span class="pulse"></span>OFFLINE</div>
+        </div>
+        <button class="friend-add"><i data-lucide="plus"></i></button>
+    </div>
 </div>
 
-<div class="menu-btn">
-<i data-lucide="calendar"></i>
-EVENTS
+<!-- mode + start -->
+<div class="side-bottom">
+    <div class="mode-card glass">
+        <div class="mode-row main">
+            <i data-lucide="crosshair"></i>
+            <span id="modeLabel">CS-RANKED</span>
+            <i data-lucide="chevron-down" class="chev"></i>
+            <select class="mode-select" id="modeSelect">
+                <option value="CS-RANKED">CS Ranked</option>
+                <option value="1V1">1v1</option>
+                <option value="TEAM">Team</option>
+                <option value="LV MODE">LV Mode</option>
+                <option value="TDM">TDM</option>
+            </select>
+        </div>
+        <div class="mode-divider"></div>
+        <div class="mode-row sub">
+            <i data-lucide="map"></i>
+            <span>Random Map</span>
+        </div>
+    </div>
+
+    <button class="start-btn">
+        <i data-lucide="play"></i>
+        START
+    </button>
 </div>
 
+<!-- chat -->
+<div class="chat glass">
+    <i data-lucide="message-circle"></i>
+    <div class="chat-text">
+        <b>WORLD</b>
+        <span>Tap to chat...</span>
+    </div>
+    <i data-lucide="chevron-right" class="chat-arrow"></i>
 </div>
 
-<div class="friends">
-
-<b>FRIENDS</b>
-
-<div class="friend">
-Player 1
-<i data-lucide="plus"></i>
+<!-- bottom bar -->
+<div class="bottom-bar glass">
+    <div class="bottom-btn active">
+        <img src="images/weapons.png" alt="" onerror="this.outerHTML='<i data-lucide=&quot;crosshair&quot;></i>'">
+        WEAPONS
+    </div>
+    <div class="bottom-btn">
+        <img src="images/characters.png" alt="" onerror="this.outerHTML='<i data-lucide=&quot;user&quot;></i>'">
+        CHARACTERS
+    </div>
+    <div class="bottom-btn">
+        <i data-lucide="trophy"></i>
+        LEADERBOARD
+    </div>
 </div>
 
-<div class="friend">
-Player 2
-<i data-lucide="plus"></i>
-</div>
-
-<div class="friend">
-Player 3
-<i data-lucide="plus"></i>
-</div>
-
-</div>
-
-<select class="mode">
-<option>CS Ranked</option>
-<option>1v1</option>
-<option>Team</option>
-<option>LV Mode</option>
-<option>TDM</option>
-</select>
-
-<button class="start">
-▶ START
-</button>
-
-<div class="chat">
-WORLD CHAT
-</div>
-
-<div class="bottom-bar">
-
-<div class="bottom-btn">
-<img src="images/weapons.png">
-Weapons
-</div>
-
-<div class="bottom-btn">
-<img src="images/characters.png">
-Characters
-</div>
-
-<div class="bottom-btn">
-<i data-lucide="trophy"></i>
-Leaderboard
-</div>
-
-</div>
+<!-- corner nav -->
+<div class="corner-nav left glass"><i data-lucide="chevron-left"></i></div>
+<div class="corner-nav right glass"><i data-lucide="chevron-right"></i></div>
 
 </div>
 
 <script>
 lucide.createIcons();
 
+var modeSelect=document.getElementById('modeSelect');
+var modeLabel=document.getElementById('modeLabel');
+modeSelect.addEventListener('change',function(){
+    modeLabel.textContent=this.value;
+});
+
 if('serviceWorker' in navigator){
-navigator.serviceWorker.register('./sw.js');
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
 }
 </script>
 
 </body>
     </html>
+    
