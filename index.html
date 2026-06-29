@@ -537,19 +537,6 @@ button,select{
 .mode-row.main i:first-child{color:var(--cyan);width:1.2vw;height:1.2vw;}
 .mode-row.main .chev{margin-left:auto;width:1.1vw;height:1.1vw;color:var(--dim);}
 
-.mode-select{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    width:100%;
-    height:100%;
-    opacity:0;
-    border:none;
-    background:none;
-}
-
 .start-btn{
     position:absolute;
     right:1.4vw;
@@ -574,6 +561,138 @@ button,select{
 }
 
 .start-btn i{width:1.5vw;height:1.5vw;fill:#1a1100;}
+
+/* ============ MODE PICKER OVERLAY ============ */
+
+.mode-picker-backdrop{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:300;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    visibility:hidden;
+    transition:opacity .3s ease;
+    background:#02060a;
+}
+
+.mode-picker-backdrop.show{opacity:1;visibility:visible;}
+
+.mode-picker-bg{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:url("images/mode-bg.png") center/cover no-repeat,linear-gradient(160deg,#0a1a26,#02060a);
+}
+
+.mode-picker-bg::after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:linear-gradient(180deg,rgba(2,6,10,.55),rgba(2,6,10,.88));
+}
+
+.mode-picker-close{
+    position:absolute;
+    top:2.2vw;
+    right:2.2vw;
+    width:2.6vw;
+    height:2.6vw;
+    min-width:34px;
+    min-height:34px;
+    border:1px solid var(--cyan-soft);
+    background:rgba(8,16,26,.7);
+    border-radius:50%;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:2;
+}
+
+.mode-picker-close i{width:55%;height:55%;}
+
+.mode-picker-title{
+    position:relative;
+    font-family:'Orbitron',sans-serif;
+    font-weight:800;
+    font-size:1.6vw;
+    color:var(--ink);
+    letter-spacing:.08em;
+    margin-bottom:2.2vw;
+    text-shadow:0 0 14px rgba(34,214,255,.5);
+    z-index:2;
+}
+
+.mode-picker-row{
+    position:relative;
+    display:flex;
+    gap:1.4vw;
+    padding:0 2vw;
+    max-width:96vw;
+    overflow-x:auto;
+    z-index:2;
+}
+
+.mode-option{
+    position:relative;
+    flex-shrink:0;
+    width:18vw;
+    max-width:250px;
+    height:26vw;
+    max-height:340px;
+    border-radius:1.2vw;
+    border:1px solid var(--cyan-soft);
+    background-size:cover;
+    background-position:center;
+    background-color:#0a1620;
+    overflow:hidden;
+    transition:transform .15s ease;
+}
+
+.mode-option:active{transform:scale(.96);}
+
+.mode-option-label{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:1vw .8vw;
+    background:linear-gradient(180deg,rgba(2,6,10,0),rgba(2,6,10,.92));
+    text-align:center;
+}
+
+.mode-option-label .name{
+    display:block;
+    color:var(--ink);
+    font-weight:700;
+    font-size:1vw;
+    letter-spacing:.03em;
+}
+
+.mode-option-label .rank{
+    display:block;
+    color:var(--cyan);
+    font-family:'Orbitron',sans-serif;
+    font-weight:800;
+    font-size:.85vw;
+    letter-spacing:.06em;
+    margin-top:.2vw;
+}
+
+.mode-option.play-now .mode-option-label{
+    background:linear-gradient(180deg,rgba(2,6,10,0),rgba(120,80,0,.9));
+}
 
 /* ============ CHAT ============ */
 
@@ -648,6 +767,8 @@ button,select{
     font-size:.85vw;
     letter-spacing:.02em;
     position:relative;
+    background:none;
+    border:none;
 }
 
 .bottom-btn:not(:last-child)::after{
@@ -724,6 +845,13 @@ button,select{
 .bottom-btn{font-size:1.7vw;}
 .bottom-btn img,.bottom-btn i{width:4vw;height:4vw;}
 
+.mode-picker-title{font-size:3.6vw;margin-bottom:4vw;}
+.mode-picker-close{width:7vw;height:7vw;top:4vw;right:4vw;}
+.mode-picker-row{gap:3vw;padding:0 4vw;}
+.mode-option{width:58vw;height:78vw;max-height:none;}
+.mode-option-label .name{font-size:2.4vw;}
+.mode-option-label .rank{font-size:2vw;}
+
 }
 
 </style>
@@ -735,7 +863,7 @@ button,select{
 
 <!-- profile -->
 <div class="profile glass">
-    <div class="avatar-wrap">
+    <div class="avatar-wrap" id="avatarBtn">
         <div class="avatar-fallback"></div>
         <img class="avatar" src="images/avatar.png" alt="" onerror="this.style.display='none'">
         <div class="rank-badge"><i data-lucide="shield"></i></div>
@@ -749,14 +877,14 @@ button,select{
     </div>
 </div>
 
-<!-- bell / mail -->
+<!-- bell / settings -->
 <div class="top-icons">
-    <button class="icon-btn glass">
+    <button class="icon-btn glass nav-link" data-page="notification.html">
         <i data-lucide="bell"></i>
         <span class="dot"></span>
     </button>
-    <button class="icon-btn glass">
-        <i data-lucide="mail"></i>
+    <button class="icon-btn glass nav-link" data-page="settings.html">
+        <i data-lucide="settings"></i>
     </button>
 </div>
 
@@ -771,31 +899,31 @@ button,select{
     <div class="money glass">
         <img src="images/coin.png" alt="">
         <span>12500</span>
-        <button class="plus-btn">+</button>
+        <button class="plus-btn nav-link" data-page="store.html">+</button>
     </div>
     <div class="money glass">
         <img src="images/gem.png" alt="">
         <span>850</span>
-        <button class="plus-btn">+</button>
+        <button class="plus-btn nav-link" data-page="store.html">+</button>
     </div>
     <div class="money glass">
         <img src="images/token.png" alt="">
         <span>24</span>
-        <button class="plus-btn">+</button>
+        <button class="plus-btn nav-link" data-page="store.html">+</button>
     </div>
 </div>
 
 <!-- left menu -->
 <div class="left-menu">
-    <button class="menu-btn glass">
+    <button class="menu-btn glass nav-link" data-page="store.html">
         <span class="menu-icon"><i data-lucide="shopping-cart"></i></span>
         STORE
     </button>
-    <button class="menu-btn glass">
+    <button class="menu-btn glass nav-link" data-page="l-arena.html">
         <span class="menu-icon"><i data-lucide="sparkles"></i></span>
         LUCKY ARENA
     </button>
-    <button class="menu-btn glass">
+    <button class="menu-btn glass nav-link" data-page="events.html">
         <span class="menu-icon"><i data-lucide="calendar-days"></i></span>
         EVENTS
     </button>
@@ -827,51 +955,6 @@ button,select{
                 <div class="friend-avatar"></div>
                 <div class="friend-info">
                     <div class="friend-name">FRIEND NAME</div>
-                    <div class="friend-status status-online"><span class="pulse"></span>ONLINE</div>
-                </div>
-                <button class="friend-add"><i data-lucide="plus"></i></button>
-            </div>
-
-            <div class="friend">
-                <div class="friend-avatar"></div>
-                <div class="friend-info">
-                    <div class="friend-name">FRIEND NAME</div>
-                    <div class="friend-status status-online"><span class="pulse"></span>ONLINE</div>
-                </div>
-                <button class="friend-add"><i data-lucide="plus"></i></button>
-            </div>
-
-            <div class="friend">
-                <div class="friend-avatar"></div>
-                <div class="friend-info">
-                    <div class="friend-name">FRIEND NAME</div>
-                    <div class="friend-status status-offline"><span class="pulse"></span>OFFLINE</div>
-                </div>
-                <button class="friend-add"><i data-lucide="plus"></i></button>
-            </div>
-
-            <div class="friend">
-                <div class="friend-avatar"></div>
-                <div class="friend-info">
-                    <div class="friend-name">FRIEND NAME</div>
-                    <div class="friend-status status-offline"><span class="pulse"></span>OFFLINE</div>
-                </div>
-                <button class="friend-add"><i data-lucide="plus"></i></button>
-            </div>
-
-            <div class="friend">
-                <div class="friend-avatar"></div>
-                <div class="friend-info">
-                    <div class="friend-name">FRIEND NAME</div>
-                    <div class="friend-status status-online"><span class="pulse"></span>ONLINE</div>
-                </div>
-                <button class="friend-add"><i data-lucide="plus"></i></button>
-            </div>
-
-            <div class="friend">
-                <div class="friend-avatar"></div>
-                <div class="friend-info">
-                    <div class="friend-name">FRIEND NAME</div>
                     <div class="friend-status status-offline"><span class="pulse"></span>OFFLINE</div>
                 </div>
                 <button class="friend-add"><i data-lucide="plus"></i></button>
@@ -882,23 +965,16 @@ button,select{
 </div>
 
 <!-- mode -->
-<div class="mode-card glass">
+<button class="mode-card glass" id="modeCardBtn">
     <div class="mode-row main">
         <i data-lucide="crosshair"></i>
-        <span id="modeLabel">CS-RANKED</span>
+        <span id="modeLabel">BA RANKED</span>
         <i data-lucide="chevron-down" class="chev"></i>
-        <select class="mode-select" id="modeSelect">
-            <option value="CS-RANKED">CS Ranked</option>
-            <option value="1V1">1v1</option>
-            <option value="TEAM">Team</option>
-            <option value="LV MODE">LV Mode</option>
-            <option value="TDM">TDM</option>
-        </select>
     </div>
-</div>
+</button>
 
 <!-- start -->
-<button class="start-btn">
+<button class="start-btn" id="startBtn">
     <i data-lucide="play"></i>
     START
 </button>
@@ -915,36 +991,104 @@ button,select{
 
 <!-- bottom bar -->
 <div class="bottom-bar glass">
-    <div class="bottom-btn active">
+    <button class="bottom-btn active nav-link" data-page="weapons.html">
         <img src="images/weapons.png" alt="" onerror="this.outerHTML='<i data-lucide=&quot;crosshair&quot;></i>'">
         WEAPONS
-    </div>
-    <div class="bottom-btn">
+    </button>
+    <button class="bottom-btn nav-link" data-page="characters.html">
         <img src="images/characters.png" alt="" onerror="this.outerHTML='<i data-lucide=&quot;user&quot;></i>'">
         CHARACTERS
-    </div>
-    <div class="bottom-btn">
+    </button>
+    <button class="bottom-btn nav-link" data-page="leaderboard.html">
         <i data-lucide="trophy"></i>
         LEADERBOARD
+    </button>
+</div>
+
+<!-- mode picker overlay -->
+<div class="mode-picker-backdrop" id="modePickerBackdrop">
+    <div class="mode-picker-bg"></div>
+    <button class="mode-picker-close" id="modePickerClose"><i data-lucide="x"></i></button>
+    <div class="mode-picker-title">SELECT MATCH TYPE</div>
+    <div class="mode-picker-row">
+
+        <button class="mode-option" data-mode="BA RANKED" style="background-image:url('images/mode-battle-arena.png')">
+            <div class="mode-option-label">
+                <span class="name">BATTLE ARENA</span>
+                <span class="rank">BA RANKED</span>
+            </div>
+        </button>
+
+        <button class="mode-option" data-mode="SA RANKED" style="background-image:url('images/mode-squad-arena.png')">
+            <div class="mode-option-label">
+                <span class="name">SQUAD ARENA</span>
+                <span class="rank">SA RANKED</span>
+            </div>
+        </button>
+
+        <button class="mode-option" data-mode="APEX ARENA" style="background-image:url('images/mode-apex-arena.png')">
+            <div class="mode-option-label">
+                <span class="name">APEX ARENA</span>
+            </div>
+        </button>
+
+        <button class="mode-option play-now" data-mode="PLAY NOW" style="background-image:url('images/mode-play-now.png')">
+            <div class="mode-option-label">
+                <span class="name">PLAY NOW</span>
+            </div>
+        </button>
+
     </div>
 </div>
 
 </div>
+
+<script src="friends.js"></script>
 
 <script>
 lucide.createIcons();
 
-var modeSelect=document.getElementById('modeSelect');
-var modeLabel=document.getElementById('modeLabel');
-modeSelect.addEventListener('change',function(){
-    modeLabel.textContent=this.value;
+/* page navigation - store, l-arena, events, weapons, characters,
+   leaderboard, notification, settings all just route out via data-page */
+document.querySelectorAll('.nav-link').forEach(function(el){
+    el.addEventListener('click',function(){
+        var page=el.getAttribute('data-page');
+        if(page)window.location.href=page;
+    });
 });
 
-var friendsCard=document.getElementById('friendsCard');
-var friendsToggle=document.getElementById('friendsToggle');
-friendsToggle.addEventListener('click',function(){
-    var isOpen=friendsCard.classList.toggle('open');
-    friendsToggle.setAttribute('aria-expanded',isOpen?'true':'false');
+/* match type picker - tap CS-RANKED row, choose a big card, it closes
+   and updates the label START will read from */
+var selectedMode='BA RANKED';
+var modeLabel=document.getElementById('modeLabel');
+var modeCardBtn=document.getElementById('modeCardBtn');
+var modePickerBackdrop=document.getElementById('modePickerBackdrop');
+var modePickerClose=document.getElementById('modePickerClose');
+
+modeCardBtn.addEventListener('click',function(){
+    modePickerBackdrop.classList.add('show');
+});
+
+modePickerClose.addEventListener('click',function(){
+    modePickerBackdrop.classList.remove('show');
+});
+
+modePickerBackdrop.addEventListener('click',function(e){
+    if(e.target===modePickerBackdrop)modePickerBackdrop.classList.remove('show');
+});
+
+document.querySelectorAll('.mode-option').forEach(function(opt){
+    opt.addEventListener('click',function(){
+        selectedMode=opt.getAttribute('data-mode');
+        modeLabel.textContent=selectedMode;
+        modePickerBackdrop.classList.remove('show');
+    });
+});
+
+/* start - hands the chosen match type to start.html */
+document.getElementById('startBtn').addEventListener('click',function(){
+    sessionStorage.setItem('selectedMode',selectedMode);
+    window.location.href='start.html?mode='+encodeURIComponent(selectedMode);
 });
 
 if('serviceWorker' in navigator){
@@ -953,4 +1097,4 @@ if('serviceWorker' in navigator){
 </script>
 
 </body>
-</html>
+                    </html>
