@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Syrix Arena</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#000;
+    font-family:'Rajdhani',Arial,sans-serif;
+}
+
+.bg{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:url("images/loading.png") center/cover no-repeat;
+}
+
+.bg::after{
+    content:"";
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:linear-gradient(
+        180deg,
+        rgba(2,6,10,.25) 0%,
+        rgba(2,6,10,.18) 40%,
+        rgba(2,6,10,.72) 72%,
+        rgba(2,6,10,.96) 100%
+    );
+}
+
+.ui{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    padding-bottom:5vh;
+    z-index:2;
+}
+
+/* logo - shows at the top so it's visible over the art */
+.logo-wrap{
+    position:fixed;
+    top:7vw;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1.2vw;
+    z-index:3;
+}
+
+.logo-text{
+    font-family:'Orbitron',sans-serif;
+    font-weight:900;
+    font-size:8vw;
+    white-space:nowrap;
+    letter-spacing:.04em;
+    line-height:1;
+}
+
+.logo-text .w{color:#eaf7ff;text-shadow:0 0 20px rgba(255,255,255,.35);}
+.logo-text .c{color:#22d6ff;text-shadow:0 0 24px rgba(34,214,255,.9);}
+
+.logo-sub{
+    color:rgba(160,210,230,.7);
+    font-size:3vw;
+    font-weight:600;
+    letter-spacing:.22em;
+}
+
+/* bottom section */
+.bottom{
+    width:100%;
+    padding:0 6vw;
+    display:flex;
+    flex-direction:column;
+    gap:3vw;
+}
+
+/* tips */
+.tips-wrap{
+    display:flex;
+    align-items:flex-start;
+    gap:3vw;
+    min-height:11vw;
+}
+
+.tip-label{
+    color:#ffc534;
+    font-family:'Orbitron',sans-serif;
+    font-size:2.4vw;
+    font-weight:800;
+    letter-spacing:.06em;
+    white-space:nowrap;
+    margin-top:.4vw;
+}
+
+.tip-text{
+    color:rgba(220,240,255,.88);
+    font-size:3.2vw;
+    font-weight:600;
+    line-height:1.45;
+    transition:opacity .35s ease;
+}
+
+.tip-text.fade{opacity:0;}
+
+/* progress bar */
+.bar-wrap{
+    display:flex;
+    flex-direction:column;
+    gap:1.5vw;
+}
+
+.bar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.bar-status{
+    color:rgba(180,220,240,.7);
+    font-size:2.6vw;
+    font-weight:600;
+    letter-spacing:.04em;
+}
+
+.bar-pct{
+    color:#22d6ff;
+    font-family:'Orbitron',sans-serif;
+    font-size:2.6vw;
+    font-weight:700;
+}
+
+.bar-track{
+    width:100%;
+    height:2.2vw;
+    border-radius:2vw;
+    background:rgba(255,255,255,.1);
+    border:1px solid rgba(34,214,255,.3);
+    overflow:hidden;
+}
+
+.bar-fill{
+    height:100%;
+    width:0%;
+    border-radius:2vw;
+    background:linear-gradient(90deg,#22d6ff,#ffc534);
+    box-shadow:0 0 12px rgba(34,214,255,.6);
+    transition:width .25s ease;
+}
+
+/* version tag */
+.version{
+    text-align:center;
+    color:rgba(100,140,160,.5);
+    font-size:2.2vw;
+    letter-spacing:.06em;
+    margin-top:1vw;
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg"></div>
+
+<div class="logo-wrap">
+    <div class="logo-text"><span class="w">SYRIX</span> <span class="c">ARENA</span></div>
+    <div class="logo-sub">ENTER THE ARENA</div>
+</div>
+
+<div class="ui">
+    <div class="bottom">
+
+        <div class="tips-wrap">
+            <div class="tip-label">TIP</div>
+            <div class="tip-text" id="tipText">Use the left joystick to move and drag the right side of the screen to aim.</div>
+        </div>
+
+        <div class="bar-wrap">
+            <div class="bar-row">
+                <div class="bar-status" id="barStatus">Initializing...</div>
+                <div class="bar-pct" id="barPct">0%</div>
+            </div>
+            <div class="bar-track">
+                <div class="bar-fill" id="barFill"></div>
+            </div>
+        </div>
+
+        <div class="version">v0.1.0 BETA</div>
+
+    </div>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+
+<script>
+
+/* --- TIPS --- */
+
+var tips = [
+    "Use the left joystick to move and drag the right side of the screen to aim.",
+    "Hold the fire button to keep shooting with automatic weapons.",
+    "When your magazine empties, your weapon reloads automatically.",
+    "Pick your match type from the lobby before tapping START.",
+    "Visit the STORE to unlock new weapons, characters, and skins.",
+    "Open the FRIENDS panel in the lobby to squad up before a match.",
+    "Customize your HUD layout anytime from the Settings menu.",
+    "The APEX ARENA mode rewards the last player standing."
+];
+
+var currentTip = 0;
+var tipEl = document.getElementById("tipText");
+
+function rotateTip() {
+    tipEl.classList.add("fade");
+    setTimeout(function () {
+        currentTip = (currentTip + 1) % tips.length;
+        tipEl.textContent = tips[currentTip];
+        tipEl.classList.remove("fade");
+    }, 380);
+}
+
+var tipInterval = setInterval(rotateTip, 4000);
+
+/* --- LOADING PROGRESS --- */
+
+var barFill = document.getElementById("barFill");
+var barStatus = document.getElementById("barStatus");
+var barPct = document.getElementById("barPct");
+
+function setProgress(pct, label) {
+    barFill.style.width = pct + "%";
+    barPct.textContent = Math.round(pct) + "%";
+    if (label) barStatus.textContent = label;
+}
+
+/* preload images that are definitely needed in the lobby */
+var imagesToPreload = [
+    "images/bg.png",
+    "images/coin.png",
+    "images/gem.png",
+    "images/token.png",
+    "images/weapons.png",
+    "images/characters.png"
+];
+
+function preloadImage(src) {
+    return new Promise(function (resolve) {
+        var img = new Image();
+        img.onload = img.onerror = resolve;
+        img.src = src;
+    });
+}
+
+var authReady = false;
+var assetsReady = false;
+var routeTarget = null;
+var minTimeReady = false;
+
+/* minimum display time so the screen isn't just a flash */
+setTimeout(function () {
+    minTimeReady = true;
+    tryRoute();
+}, 2200);
+
+/* load each image in sequence and update the bar */
+setProgress(5, "Loading assets...");
+
+var total = imagesToPreload.length;
+var loaded = 0;
+
+function loadNextImage() {
+    if (loaded >= total) {
+        assetsReady = true;
+        setProgress(80, "Connecting...");
+        tryRoute();
+        return;
+    }
+    var pct = 5 + ((loaded / total) * 72);
+    preloadImage(imagesToPreload[loaded]).then(function () {
+        loaded++;
+        setProgress(pct, "Loading assets...");
+        loadNextImage();
+    });
+}
+
+loadNextImage();
+
+/* Firebase: wait for auth state - this also confirms the SDK is ready */
+auth.onAuthStateChanged(function (user) {
+    routeTarget = user;
+    authReady = true;
+    setProgress(100, "Ready!");
+    tryRoute();
+});
+
+function tryRoute() {
+    if (!authReady || !minTimeReady) return;
+
+    clearInterval(tipInterval);
+
+    setTimeout(function () {
+        if (routeTarget) {
+            /* user is signed in - check first-time vs returning */
+            if (isFirstTimeUser(routeTarget)) {
+                window.location.replace("onboarding.html");
+            } else {
+                window.location.replace("index.html");
+            }
+        } else {
+            /* not signed in - go to auth */
+            window.location.replace("auth.html");
+        }
+    }, 400);
+}
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+}
+
+</script>
+</body>
+  </html>
+  
