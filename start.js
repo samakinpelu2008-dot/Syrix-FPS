@@ -39,7 +39,8 @@ loader.load(
     undefined,
 
     function(error){
-        console.error(error);
+    console.error(error);
+    alert("Failed to load map!");
     }
 );
 
