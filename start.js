@@ -67,7 +67,7 @@ setProgress(0.05, 'LOADING MAP…');
 
 const loader = new THREE.GLTFLoader();
 loader.load(
-    'assets/low-poly_fps_map.glb',
+    'assets/maps/low-poly_fps_map.glb',
 
     // ── onLoad ──────────────────────────────────────────────────────────────
     (gltf) => {
