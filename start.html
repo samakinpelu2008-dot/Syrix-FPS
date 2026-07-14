@@ -1,39 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Syrix Arena - Game</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>Syrix Arena – Map</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; touch-action:none; }
+    html, body { width:100%; height:100%; overflow:hidden; background:#000; font-family:monospace; position:fixed; }
 
-    <style>
-        html, body{
-            margin:0;
-            overflow:hidden;
-            width:100%;
-            height:100%;
-            background:#000;
-        }
+    #canvas { display:block; width:100%; height:100%; }
 
-        canvas{
-            display:block;
-        }
+    /* ── Loading screen ─────────────────────────────────── */
+    #loading {
+      position:fixed; inset:0; z-index:100;
+      background:#040509;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:20px;
+    }
+    #loading h1 { color:#00f0ff; font-size:22px; letter-spacing:6px; text-shadow:0 0 20px #00f0ff; }
+    #bar-wrap   { width:200px; height:4px; background:rgba(0,240,255,0.15); border-radius:2px; }
+    #bar        { height:100%; width:0%; background:#00f0ff; box-shadow:0 0 8px #00f0ff; transition:width .2s; border-radius:2px; }
+    #load-msg   { color:rgba(0,240,255,0.5); font-size:11px; letter-spacing:2px; }
 
-        #loading{
-            position:absolute;
-            top:50%;
-            left:50%;
-            transform:translate(-50%,-50%);
-            color:white;
-            font-family:Arial;
-            font-size:22px;
-        }
-    </style>
+    /* ── Crosshair ──────────────────────────────────────── */
+    #crosshair {
+      position:fixed; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      pointer-events:none; z-index:10;
+    }
+    #crosshair::before,
+    #crosshair::after { content:''; position:absolute; background:rgba(255,255,255,0.8); }
+    #crosshair::before { width:12px; height:1px; top:0; left:-6px; }
+    #crosshair::after  { width:1px; height:12px; top:-6px; left:0; }
+
+    /* ── Joystick ───────────────────────────────────────── */
+    #joy-ring {
+      position:fixed; width:120px; height:120px; border-radius:50%;
+      border:2px dashed rgba(0,240,255,0.35);
+      background:rgba(0,240,255,0.02);
+      opacity:0; transition:opacity .2s;
+      pointer-events:none;
+      display:flex; align-items:center; justify-content:center;
+    }
+    #joy-dot {
+      width:44px; height:44px; border-radius:50%;
+      background:rgba(0,240,255,0.7);
+      box-shadow:0 0 12px #00f0ff;
+    }
+
+    /* ── Jump button ────────────────────────────────────── */
+    #btn-jump {
+      position:fixed; bottom:50px; right:40px;
+      width:64px; height:64px; border-radius:50%;
+      background:rgba(18,20,32,0.7);
+      border:1px solid rgba(122,0,255,0.5);
+      color:#af7aff; font-size:11px; letter-spacing:1px;
+      display:flex; align-items:center; justify-content:center;
+      z-index:20;
+    }
+    #btn-jump:active { background:rgba(122,0,255,0.25); }
+
+    /* ── Back button ────────────────────────────────────── */
+    #btn-back {
+      position:fixed; top:16px; left:16px; z-index:20;
+      padding:8px 16px;
+      background:rgba(18,20,32,0.7);
+      border:1px solid rgba(0,240,255,0.25);
+      color:rgba(0,240,255,0.6); font-size:11px; letter-spacing:2px;
+      border-radius:6px; text-decoration:none;
+    }
+
+    /* ── Debug overlay ──────────────────────────────────── */
+    #info {
+      position:fixed; top:16px; right:16px; z-index:20;
+      color:rgba(255,255,255,0.35); font-size:10px;
+      line-height:1.8; text-align:right; pointer-events:none;
+    }
+  </style>
 </head>
 <body>
 
-<div id="loading">Loading Syrix Arena...</div>
+  <canvas id="canvas"></canvas>
+  <div id="crosshair"></div>
 
-<script type="module" src="start.js"></script>
+  <div id="loading">
+    <h1>SYRIX ARENA</h1>
+    <div id="bar-wrap"><div id="bar"></div></div>
+    <div id="load-msg">LOADING MAP…</div>
+  </div>
+
+  <a href="index.html" id="btn-back">← MENU</a>
+  <div id="btn-jump">JUMP</div>
+  <div id="joy-ring"><div id="joy-dot"></div></div>
+  <div id="info"></div>
+
+  <!-- Three.js r128 + GLTFLoader as globals (must come before start.js module) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script type="module" src="start.js"></script>
 
 </body>
 </html>
