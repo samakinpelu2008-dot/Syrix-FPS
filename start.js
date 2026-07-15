@@ -1,346 +1,750 @@
-// start.js — Map explorer: load the GLB, walk around, look around.
-// No enemies or weapons yet — those come next.
+// PART 1 OF 3
+// start.js
 
-// ─── Map constants (from GLB analysis) ────────────────────────────────────────
-// The GLB is a Sketchfab FBX export with Z-up orientation.
-// Raw bounds: X[-9.84..117.48], Y[-5.09..89.84], Z[-0.12..4.6]
-// Fix: rotate -90° on X  →  floor lands at Three.js Y≈0
-// Then translate (-53.82, 0, 42.38) to centre the map at world origin.
-const MAP_ROT_X    = -Math.PI / 2;
-const MAP_OFFSET_X = -53.82;
-const MAP_OFFSET_Z =  42.38;
+// ==========================================================
+// IMPORTS
+// ==========================================================
 
-const EYE_HEIGHT   = 1.6;   // camera Y when standing
-const ARENA_BOUND  = 58;    // clamp player inside centred map
-const GRAVITY      = 28;
-const JUMP_FORCE   = 11;
-const WALK_SPEED   = 5;
-const RUN_SPEED    = 9.5;
-const LOOK_YAW     = 0.006;
-const LOOK_PITCH   = 0.005;
+const canvas = document.getElementById("canvas");
 
-// ─── Three.js setup ───────────────────────────────────────────────────────────
-const canvas   = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
+const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: true
+});
+
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-const scene  = new THREE.Scene();
+const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x050810);
-scene.fog        = new THREE.FogExp2(0x050810, 0.018);
+scene.fog = new THREE.FogExp2(0x050810,0.018);
 
-// Camera — YXZ order prevents the yaw/pitch coupling bug
-const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 300);
-camera.rotation.order = 'YXZ';
-camera.position.set(0, EYE_HEIGHT, 0);
+// ==========================================================
+// CAMERA
+// ==========================================================
 
-// ─── Lighting ─────────────────────────────────────────────────────────────────
-const ambient = new THREE.AmbientLight(0xffffff, 0.35);
-scene.add(ambient);
-
-const sun = new THREE.DirectionalLight(0xffeedd, 1.1);
-sun.position.set(30, 60, 20);
-sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.near = 0.5;
-sun.shadow.camera.far  = 200;
-sun.shadow.camera.left = sun.shadow.camera.bottom = -80;
-sun.shadow.camera.right= sun.shadow.camera.top    =  80;
-scene.add(sun);
-
-// Subtle fill from below (bounce light on dark map)
-const fill = new THREE.HemisphereLight(0x223355, 0x080c14, 0.5);
-scene.add(fill);
-
-// ─── Load GLB map ─────────────────────────────────────────────────────────────
-const bar     = document.getElementById('bar');
-const loadMsg = document.getElementById('load-msg');
-
-function setProgress(pct, msg) {
-    bar.style.width = `${Math.round(pct * 100)}%`;
-    if (msg) loadMsg.textContent = msg;
-}
-
-setProgress(0.05, 'LOADING MAP…');
-
-const loader = new THREE.GLTFLoader();
-loader.load(
-    'assets/maps/low-poly_fps_map.glb',
-
-    // ── onLoad ──────────────────────────────────────────────────────────────
-    (gltf) => {
-        setProgress(0.9, 'BUILDING SCENE…');
-
-        const root = gltf.scene;
-
-        // Fix Z-up orientation from FBX export
-        root.rotation.x = MAP_ROT_X;
-
-        // Centre at world origin
-        root.position.set(MAP_OFFSET_X, 0, MAP_OFFSET_Z);
-
-        root.traverse(child => {
-            if (child.isMesh) {
-                child.castShadow    = true;
-                child.receiveShadow = true;
-                // Keep original materials but make them look slightly better
-                if (child.material) {
-                    child.material.envMapIntensity = 0.3;
-                }
-            }
-        });
-
-        scene.add(root);
-
-        setProgress(1.0, 'READY');
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-        }, 300);
-    },
-
-    // ── onProgress ──────────────────────────────────────────────────────────
-    (xhr) => {
-        if (xhr.total) setProgress(0.05 + (xhr.loaded / xhr.total) * 0.8, 'LOADING MAP…');
-    },
-
-    // ── onError ─────────────────────────────────────────────────────────────
-    (err) => {
-        console.error('Map load error:', err);
-        // Fallback floor so the game still runs if the file path is wrong
-        loadMsg.textContent = 'MAP NOT FOUND — using fallback floor';
-        const floor = new THREE.Mesh(
-            new THREE.PlaneGeometry(200, 200, 20, 20),
-            new THREE.MeshStandardMaterial({ color: 0x0d0f1a, roughness: 0.9 })
-        );
-        floor.rotation.x = -Math.PI / 2;
-        floor.receiveShadow = true;
-        scene.add(floor);
-
-        const grid = new THREE.GridHelper(200, 40, 0x00f0ff, 0x111828);
-        grid.position.y = 0.01;
-        scene.add(grid);
-
-        setTimeout(() => {
-            document.getElementById('loading').style.display = 'none';
-        }, 800);
-    }
+const camera = new THREE.PerspectiveCamera(
+    70,
+    innerWidth / innerHeight,
+    0.1,
+    500
 );
 
-// ─── Player state ─────────────────────────────────────────────────────────────
-const player = {
-    velY       : 0,       // vertical velocity for jump / gravity
-    grounded   : true,
-    // Smooth horizontal velocity (momentum)
-    velX       : 0,
-    velZ       : 0,
-};
+camera.rotation.order = "YXZ";
 
-// Touch input state
+// ==========================================================
+// PLAYER
+// ==========================================================
+
+const PLAYER_HEIGHT = 1.7;
+const PLAYER_RADIUS = 0.35;
+
+const player = new THREE.Group();
+scene.add(player);
+
+player.position.set(0,0,0);
+
+player.add(camera);
+
+camera.position.set(
+    0,
+    PLAYER_HEIGHT,
+    0
+);
+
+const velocity = new THREE.Vector3();
+const direction = new THREE.Vector3();
+
+let onGround = false;
+
+// ==========================================================
+// SETTINGS
+// ==========================================================
+
+const WALK_SPEED = 5;
+const RUN_SPEED = 9;
+const JUMP_FORCE = 9;
+const GRAVITY = 30;
+
+const LOOK_SPEED_X = 0.006;
+const LOOK_SPEED_Y = 0.005;
+
+const MAP_ROT_X = -Math.PI/2;
+const MAP_OFFSET_X = -53.82;
+const MAP_OFFSET_Z = 42.38;
+
+// ==========================================================
+// LIGHTING
+// ==========================================================
+
+scene.add(
+    new THREE.AmbientLight(
+        0xffffff,
+        0.35
+    )
+);
+
+const sun = new THREE.DirectionalLight(
+    0xfff2dd,
+    1.2
+);
+
+sun.position.set(
+    30,
+    60,
+    20
+);
+
+sun.castShadow = true;
+
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+
+scene.add(sun);
+
+scene.add(
+    new THREE.HemisphereLight(
+        0x223355,
+        0x080c14,
+        0.5
+    )
+);
+
+// ==========================================================
+// COLLISION DATA
+// ==========================================================
+
+const worldMeshes = [];
+let worldRoot = null;
+
+const floorRay = new THREE.Raycaster();
+const wallRay = new THREE.Raycaster();
+
+const DOWN = new THREE.Vector3(
+    0,
+    -1,
+    0
+);
+
+// ==========================================================
+// LOADER
+// ==========================================================
+
+const loader = new THREE.GLTFLoader();
+
+loader.load(
+
+"assets/maps/low-poly_fps_map.glb",
+
+(gltf)=>{
+
+worldRoot = gltf.scene;
+
+worldRoot.rotation.x = MAP_ROT_X;
+
+worldRoot.position.set(
+MAP_OFFSET_X,
+0,
+MAP_OFFSET_Z
+);
+
+worldRoot.updateMatrixWorld(true);
+
+worldRoot.traverse(mesh=>{
+
+if(!mesh.isMesh) return;
+
+mesh.castShadow=true;
+mesh.receiveShadow=true;
+
+worldMeshes.push(mesh);
+
+});
+
+scene.add(worldRoot);
+
+// Spawn player on map
+
+spawnPlayer();
+
+document.getElementById("loading").style.display="none";
+
+},
+
+(xhr)=>{
+
+if(xhr.total){
+
+const p=Math.round(xhr.loaded/xhr.total*100);
+
+document.getElementById("bar").style.width=p+"%";
+
+}
+
+},
+
+(err)=>{
+
+console.error(err);
+
+}
+
+);
+
+// ==========================================================
+// SPAWN
+// ==========================================================
+
+function spawnPlayer(){
+
+const start=new THREE.Vector3(
+0,
+50,
+0
+);
+
+floorRay.set(
+start,
+DOWN
+);
+
+const hit=floorRay.intersectObjects(
+worldMeshes,
+true
+);
+
+if(hit.length){
+
+player.position.copy(hit[0].point);
+
+}
+
+else{
+
+player.position.set(
+0,
+0,
+0
+);
+
+}
+
+}
+
+// ==========================================================
+// INPUT
+// ==========================================================
+
+const keys={};
+
+addEventListener("keydown",e=>{
+
+keys[e.code]=true;
+
+});
+
+addEventListener("keyup",e=>{
+
+keys[e.code]=false;
+
+});
+
+window.addEventListener("mousemove",e=>{
+
+if(e.buttons!==1) return;
+
+player.rotation.y-=e.movementX*0.003;
+
+camera.rotation.x-=e.movementY*0.003;
+
+camera.rotation.x=Math.max(
+
+-1.4,
+
+Math.min(
+
+1.4,
+
+camera.rotation.x
+
+)
+
+);
+
+});
+
+// ===== END OF PART 1 =====
+// ==========================================================
+// PART 2 OF 3
+// CONTINUE BELOW PART 1
+// ==========================================================
+
+// -----------------------------
+// MOBILE TOUCH
+// -----------------------------
+
 const joy = {
-    id     : null,
-    startX : 0,
-    startY : 0,
-    dx     : 0,   // -1..1 normalised
-    dy     : 0,   // -1..1 normalised   (positive = forward)
+    id: null,
+    startX: 0,
+    startY: 0,
+    dx: 0,
+    dy: 0
 };
+
 const look = {
-    id     : null,
-    lastX  : 0,
-    lastY  : 0,
+    id: null,
+    lastX: 0,
+    lastY: 0
 };
 
-// ─── Joystick DOM refs ────────────────────────────────────────────────────────
-const joyRing = document.getElementById('joy-ring');
-const joyDot  = document.getElementById('joy-dot');
-const JOY_R   = 50; // max knob travel radius (px)
+const joyRing = document.getElementById("joy-ring");
+const joyDot = document.getElementById("joy-dot");
 
-function updateJoyDot(dx, dy) {
-    joyDot.style.transform = `translate(${dx}px, ${dy}px)`;
+const JOY_RADIUS = 50;
+
+function moveDot(x,y){
+
+    joyDot.style.transform =
+        `translate(${x}px,${y}px)`;
+
 }
 
-// ─── Touch events ─────────────────────────────────────────────────────────────
-window.addEventListener('touchstart', e => {
-    e.preventDefault();
-    for (const t of e.changedTouches) {
-        const isLeftHalf = t.clientX < window.innerWidth * 0.5;
+window.addEventListener("touchstart",e=>{
 
-        if (isLeftHalf && joy.id === null) {
-            joy.id     = t.identifier;
-            joy.startX = t.clientX;
-            joy.startY = t.clientY;
-            // Snap ring to thumb
-            joyRing.style.left    = `${t.clientX - 60}px`;
-            joyRing.style.top     = `${t.clientY - 60}px`;
-            joyRing.style.opacity = '1';
-            updateJoyDot(0, 0);
-        }
+e.preventDefault();
 
-        if (!isLeftHalf && look.id === null) {
-            // Ignore taps on the jump button
-            if (e.target.id === 'btn-jump') continue;
-            look.id    = t.identifier;
-            look.lastX = t.clientX;
-            look.lastY = t.clientY;
-        }
-    }
-}, { passive: false });
+for(const t of e.changedTouches){
 
-window.addEventListener('touchmove', e => {
-    e.preventDefault();
-    for (const t of e.touches) {
-        // ── Joystick ──────────────────────────────────────────────────────
-        if (t.identifier === joy.id) {
-            let dx = t.clientX - joy.startX;
-            let dy = t.clientY - joy.startY;
-            const dist  = Math.min(Math.hypot(dx, dy), JOY_R);
-            const angle = Math.atan2(dy, dx);
-            dx = Math.cos(angle) * dist;
-            dy = Math.sin(angle) * dist;
-            updateJoyDot(dx, dy);
-            joy.dx =  dx / JOY_R;
-            joy.dy = -dy / JOY_R;   // positive Y = forward (joystick up = move forward)
-        }
+const left=t.clientX<innerWidth*0.5;
 
-        // ── Look ──────────────────────────────────────────────────────────
-        if (t.identifier === look.id) {
-            const mx = t.clientX - look.lastX;
-            const my = t.clientY - look.lastY;
+if(left && joy.id===null){
 
-            // Yaw: drag right → turn right
-            camera.rotation.y -= mx * LOOK_YAW;
+joy.id=t.identifier;
 
-            // Pitch: swipe UP (negative my) → look UP ✓
-            camera.rotation.x -= my * LOOK_PITCH;
-            camera.rotation.x  = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, camera.rotation.x));
+joy.startX=t.clientX;
+joy.startY=t.clientY;
 
-            look.lastX = t.clientX;
-            look.lastY = t.clientY;
-        }
-    }
-}, { passive: false });
+joyRing.style.left=(t.clientX-60)+"px";
+joyRing.style.top=(t.clientY-60)+"px";
+joyRing.style.opacity="1";
 
-const endTouch = e => {
-    for (const t of e.changedTouches) {
-        if (t.identifier === joy.id) {
-            joy.id = null; joy.dx = 0; joy.dy = 0;
-            updateJoyDot(0, 0);
-            joyRing.style.opacity = '0';
-        }
-        if (t.identifier === look.id) look.id = null;
-    }
-};
-window.addEventListener('touchend',    endTouch, { passive: false });
-window.addEventListener('touchcancel', endTouch, { passive: false });
+moveDot(0,0);
 
-// ─── Jump button ──────────────────────────────────────────────────────────────
-document.getElementById('btn-jump').addEventListener('touchstart', e => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (player.grounded) {
-        player.velY    = JUMP_FORCE;
-        player.grounded = false;
-    }
-}, { passive: false });
+}
 
-// ─── Desktop mouse look (for testing on PC) ───────────────────────────────────
-window.addEventListener('mousemove', e => {
-    if (e.buttons !== 1) return;
-    camera.rotation.y -= e.movementX * 0.003;
-    camera.rotation.x -= e.movementY * 0.003;
-    camera.rotation.x  = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, camera.rotation.x));
+if(!left && look.id===null){
+
+if(e.target.id==="btn-jump") continue;
+
+look.id=t.identifier;
+
+look.lastX=t.clientX;
+look.lastY=t.clientY;
+
+}
+
+}
+
+},{passive:false});
+
+window.addEventListener("touchmove",e=>{
+
+e.preventDefault();
+
+for(const t of e.touches){
+
+if(t.identifier===joy.id){
+
+let dx=t.clientX-joy.startX;
+let dy=t.clientY-joy.startY;
+
+const dist=Math.min(
+Math.hypot(dx,dy),
+JOY_RADIUS
+);
+
+const ang=Math.atan2(dy,dx);
+
+dx=Math.cos(ang)*dist;
+dy=Math.sin(ang)*dist;
+
+moveDot(dx,dy);
+
+joy.dx=dx/JOY_RADIUS;
+joy.dy=-dy/JOY_RADIUS;
+
+}
+
+if(t.identifier===look.id){
+
+const mx=t.clientX-look.lastX;
+const my=t.clientY-look.lastY;
+
+player.rotation.y-=mx*LOOK_SPEED_X;
+
+camera.rotation.x-=my*LOOK_SPEED_Y;
+
+camera.rotation.x=Math.max(
+-1.4,
+Math.min(
+1.4,
+camera.rotation.x
+)
+);
+
+look.lastX=t.clientX;
+look.lastY=t.clientY;
+
+}
+
+}
+
+},{passive:false});
+
+function endTouch(e){
+
+for(const t of e.changedTouches){
+
+if(t.identifier===joy.id){
+
+joy.id=null;
+
+joy.dx=0;
+joy.dy=0;
+
+moveDot(0,0);
+
+joyRing.style.opacity="0";
+
+}
+
+if(t.identifier===look.id){
+
+look.id=null;
+
+}
+
+}
+
+}
+
+window.addEventListener(
+"touchend",
+endTouch,
+{passive:false}
+);
+
+window.addEventListener(
+"touchcancel",
+endTouch,
+{passive:false}
+);
+
+// -----------------------------
+// JUMP
+// -----------------------------
+
+document
+.getElementById("btn-jump")
+.addEventListener(
+"touchstart",
+e=>{
+
+e.preventDefault();
+
+if(onGround){
+
+velocity.y=JUMP_FORCE;
+onGround=false;
+
+}
+
+},
+{passive:false}
+);
+
+// -----------------------------
+// RESIZE
+// -----------------------------
+
+addEventListener("resize",()=>{
+
+camera.aspect=
+innerWidth/
+innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
 });
 
-// Desktop WASD
-const keys = {};
-window.addEventListener('keydown', e => { keys[e.code] = true; });
-window.addEventListener('keyup',   e => { keys[e.code] = false; });
-window.addEventListener('keydown', e => {
-    if (e.code === 'Space' && player.grounded) {
-        player.velY    = JUMP_FORCE;
-        player.grounded = false;
+// -----------------------------
+// FPS
+// -----------------------------
+
+const info=document.getElementById("info");
+
+let fps=0;
+let frames=0;
+let last=0;
+
+const clock=new THREE.Clock();
+
+// -----------------------------
+// MOVEMENT
+// -----------------------------
+
+function updateMovement(delta){
+
+let x=joy.dx;
+let z=joy.dy;
+
+if(keys["KeyW"]) z=1;
+if(keys["KeyS"]) z=-1;
+if(keys["KeyA"]) x=-1;
+if(keys["KeyD"]) x=1;
+
+const len=Math.hypot(x,z);
+
+if(len>1){
+
+x/=len;
+z/=len;
+
+}
+
+const speed=
+keys["ShiftLeft"]?
+RUN_SPEED:
+WALK_SPEED;
+
+const forward=new THREE.Vector3(
+-Math.sin(player.rotation.y),
+0,
+-Math.cos(player.rotation.y)
+);
+
+const right=new THREE.Vector3(
+Math.cos(player.rotation.y),
+0,
+-Math.sin(player.rotation.y)
+);
+
+direction.set(0,0,0);
+
+direction.addScaledVector(
+forward,
+z
+);
+
+direction.addScaledVector(
+right,
+x
+);
+
+if(direction.lengthSq()>0){
+
+direction.normalize();
+
+}
+
+velocity.x=
+direction.x*
+speed;
+
+velocity.z=
+direction.z*
+speed;
+
+player.position.x+=
+velocity.x*
+delta;
+
+player.position.z+=
+velocity.z*
+delta;
+
+velocity.y-=
+GRAVITY*
+delta;
+
+player.position.y+=
+velocity.y*
+delta;
+
+}
+// ==========================================================
+// PART 3 OF 3
+// CONTINUE BELOW PART 2
+// ==========================================================
+
+// -----------------------------
+// FLOOR COLLISION
+// -----------------------------
+
+function updateGround(){
+
+    floorRay.set(
+        player.position.clone().add(
+            new THREE.Vector3(0,2,0)
+        ),
+        DOWN
+    );
+
+    const hit = floorRay.intersectObjects(
+        worldMeshes,
+        true
+    );
+
+    if(hit.length){
+
+        const floorY = hit[0].point.y;
+
+        if(player.position.y <= floorY){
+
+            player.position.y = floorY;
+
+            velocity.y = 0;
+
+            onGround = true;
+
+        }
+
     }
-});
 
-// ─── Resize ───────────────────────────────────────────────────────────────────
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
+}
 
-// ─── Info overlay ─────────────────────────────────────────────────────────────
-const info = document.getElementById('info');
-let frameCount = 0, lastFPSTime = 0, fps = 0;
+// -----------------------------
+// WALL COLLISION
+// -----------------------------
 
-// ─── Main loop ────────────────────────────────────────────────────────────────
-const clock = new THREE.Clock();
+function updateWalls(){
 
-function loop() {
-    requestAnimationFrame(loop);
-    const delta = Math.min(clock.getDelta(), 0.05); // cap so big pauses don't launch the player
+    const dirs = [
 
-    // ── Horizontal movement ──────────────────────────────────────────────────
-    // Combine touch joystick + keyboard
-    let inputX = joy.dx;
-    let inputZ = joy.dy;
-    if (keys['KeyW'] || keys['ArrowUp'])    inputZ =  1;
-    if (keys['KeyS'] || keys['ArrowDown'])  inputZ = -1;
-    if (keys['KeyA'] || keys['ArrowLeft'])  inputX = -1;
-    if (keys['KeyD'] || keys['ArrowRight']) inputX =  1;
-    const running = keys['ShiftLeft'] || keys['ShiftRight'];
-    const speed   = running ? RUN_SPEED : WALK_SPEED;
+        new THREE.Vector3(1,0,0),
+        new THREE.Vector3(-1,0,0),
+        new THREE.Vector3(0,0,1),
+        new THREE.Vector3(0,0,-1)
 
-    // Project input onto camera-facing XZ directions
-    const fwd   = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    fwd.y = 0; fwd.normalize();
-    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
-    right.y = 0; right.normalize();
+    ];
 
-    const targetVelX = (fwd.x * inputZ + right.x * inputX) * speed;
-    const targetVelZ = (fwd.z * inputZ + right.z * inputX) * speed;
+    for(const dir of dirs){
 
-    // Exponential smoothing → momentum feel
-    const accel = 30, decel = 40;
-    const moving = (Math.abs(inputX) + Math.abs(inputZ)) > 0.01;
-    const blend  = 1 - Math.exp(-(moving ? accel : decel) * delta);
-    player.velX += (targetVelX - player.velX) * blend;
-    player.velZ += (targetVelZ - player.velZ) * blend;
+        wallRay.set(
 
-    camera.position.x += player.velX * delta;
-    camera.position.z += player.velZ * delta;
+            player.position.clone().add(
+                new THREE.Vector3(
+                    0,
+                    PLAYER_HEIGHT*0.5,
+                    0
+                )
+            ),
 
-    // Arena boundary clamp
-    camera.position.x = Math.max(-ARENA_BOUND, Math.min(ARENA_BOUND, camera.position.x));
-    camera.position.z = Math.max(-ARENA_BOUND, Math.min(ARENA_BOUND, camera.position.z));
+            dir
 
-    // ── Vertical (gravity + jump) ────────────────────────────────────────────
-    player.velY          -= GRAVITY * delta;
-    camera.position.y    += player.velY * delta;
+        );
 
-    // Simple floor: camera Y never goes below EYE_HEIGHT (no mesh raycasting yet)
-    if (camera.position.y <= EYE_HEIGHT) {
-        camera.position.y = EYE_HEIGHT;
-        player.velY       = 0;
-        player.grounded   = true;
+        const hit = wallRay.intersectObjects(
+            worldMeshes,
+            true
+        );
+
+        if(hit.length && hit[0].distance < PLAYER_RADIUS){
+
+            player.position.addScaledVector(
+
+                dir,
+
+                -(PLAYER_RADIUS-hit[0].distance)
+
+            );
+
+        }
+
     }
 
-    // ── Render ──────────────────────────────────────────────────────────────
-    renderer.render(scene, camera);
+}
 
-    // ── FPS counter ─────────────────────────────────────────────────────────
-    frameCount++;
+// -----------------------------
+// MAP LIMIT
+// -----------------------------
+
+const MAP_LIMIT = 60;
+
+function clampPlayer(){
+
+    player.position.x = Math.max(
+        -MAP_LIMIT,
+        Math.min(
+            MAP_LIMIT,
+            player.position.x
+        )
+    );
+
+    player.position.z = Math.max(
+        -MAP_LIMIT,
+        Math.min(
+            MAP_LIMIT,
+            player.position.z
+        )
+    );
+
+}
+
+// -----------------------------
+// MAIN LOOP
+// -----------------------------
+
+function animate(){
+
+    requestAnimationFrame(animate);
+
+    const delta = Math.min(
+        clock.getDelta(),
+        0.05
+    );
+
+    updateMovement(delta);
+
+    updateGround();
+
+    updateWalls();
+
+    clampPlayer();
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+    frames++;
+
     const now = performance.now();
-    if (now - lastFPSTime >= 1000) {
-        fps = frameCount;
-        frameCount  = 0;
-        lastFPSTime = now;
-        const p = camera.position;
+
+    if(now-last>=1000){
+
+        fps = frames;
+
+        frames = 0;
+
+        last = now;
+
         info.textContent =
-            `FPS ${fps}\nX ${p.x.toFixed(1)}  Y ${p.y.toFixed(1)}  Z ${p.z.toFixed(1)}`;
+`FPS ${fps}
+X ${player.position.x.toFixed(1)}
+Y ${player.position.y.toFixed(1)}
+Z ${player.position.z.toFixed(1)}`;
+
     }
+
 }
 
-loop();
-        
+animate();
+
